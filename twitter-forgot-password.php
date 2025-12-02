@@ -23,84 +23,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!checkRateLimit('password_reset', $contact_value, 3, 900)) {
                 $error = "Too many password reset requests. Please wait 15 minutes before trying again.";
             } else {
-        $conn = getDbConnection();
-        $input = trim($contact_value);
+                $conn = getDbConnection();
+                $input = trim($contact_value);
 
-        // Try to normalize if it's a phone number (but don't fail if functions don't exist)
-        if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
-            if (isPhoneNumber($input)) {
-                $input = normalizePhone($input);
-            }
-        }
+                // Try to normalize if it's a phone number
+                if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
+                    if (isPhoneNumber($input)) {
+                        $input = normalizePhone($input);
+                    }
+                }
 
-        $input_safe = $conn->real_escape_string($input);
+                $input_safe = $conn->real_escape_string($input);
 
-        // Try exact match first
-        $result = $conn->query("SELECT id, email FROM users WHERE email = '$input_safe' AND platform = 'twitter'");
+                // Try exact match first
+                $result = $conn->query("SELECT id, email FROM users WHERE email = '$input_safe' AND platform = 'twitter'");
 
-        // Check if query failed
-        if (!$result) {
-            $error = "Database error occurred. Please try again.";
-        }
-        // If no match and it might be a phone, try to find by normalized phone
-        elseif ($result->num_rows === 0) {
-            // Try phone number matching if functions exist and input was normalized (meaning it's a phone)
-            if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
-                // Check if original input was a phone number
-                if (isPhoneNumber($contact_value)) {
-                    // We already normalized $input above, so use that
-                    $normalized_input = $input;
-                    $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'twitter'");
+                // Check if query failed
+                if (!$result) {
+                    $error = "Database error occurred. Please try again.";
+                }
+                // If no match and it might be a phone, try to find by normalized phone
+                elseif ($result->num_rows === 0) {
+                    // Try phone number matching if functions exist and input was normalized (meaning it's a phone)
+                    if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
+                        // Check if original input was a phone number
+                        if (isPhoneNumber($contact_value)) {
+                            // We already normalized $input above, so use that
+                            $normalized_input = $input;
+                            $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'twitter'");
 
-                    if ($all_users) {
-                        while ($user = $all_users->fetch_assoc()) {
-                            if (isPhoneNumber($user['email'])) {
-                                $normalized_stored = normalizePhone($user['email']);
-                                if ($normalized_stored === $normalized_input) {
-                                    $result = $conn->query("SELECT id, email FROM users WHERE id = " . intval($user['id']));
-                                    break;
+                            if ($all_users) {
+                                while ($user = $all_users->fetch_assoc()) {
+                                    if (isPhoneNumber($user['email'])) {
+                                        $normalized_stored = normalizePhone($user['email']);
+                                        if ($normalized_stored === $normalized_input) {
+                                            $result = $conn->query("SELECT id, email FROM users WHERE id = " . intval($user['id']));
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-        }
 
-        if (!$error && $result && $result->num_rows > 0) {
-            $user_data = $result->fetch_assoc();
-            $user_id = $user_data['id'];
-            $user_email = $user_data['email'];
+                if (!$error && $result && $result->num_rows > 0) {
+                    $user_data = $result->fetch_assoc();
+                    $user_id = $user_data['id'];
+                    $user_email = $user_data['email'];
 
-            // Generate reset token
-            $token = bin2hex(random_bytes(32));
-            $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+                    // Generate reset token
+                    $token = bin2hex(random_bytes(32));
+                    $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-            // Check if reset_token columns exist, if not, add them
-            $check_columns = $conn->query("SHOW COLUMNS FROM users LIKE 'reset_token'");
-            if ($check_columns->num_rows === 0) {
-                // Add the columns if they don't exist
-                $conn->query("ALTER TABLE users ADD COLUMN reset_token VARCHAR(64) DEFAULT NULL AFTER date_of_birth");
-                $conn->query("ALTER TABLE users ADD COLUMN reset_token_expires TIMESTAMP NULL DEFAULT NULL AFTER reset_token");
-            }
+                    // Check if reset_token columns exist, if not, add them
+                    $check_columns = $conn->query("SHOW COLUMNS FROM users LIKE 'reset_token'");
+                    if ($check_columns->num_rows === 0) {
+                        // Add the columns if they don't exist
+                        $conn->query("ALTER TABLE users ADD COLUMN reset_token VARCHAR(64) DEFAULT NULL AFTER date_of_birth");
+                        $conn->query("ALTER TABLE users ADD COLUMN reset_token_expires TIMESTAMP NULL DEFAULT NULL AFTER reset_token");
+                    }
 
-            // Store token
-            $update_result = $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE id = $user_id");
+                    // Store token
+                    $update_result = $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE id = $user_id");
 
-            if ($update_result) {
-                $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/twitter-reset-password.php?token=$token";
+                    if ($update_result) {
+                        $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/twitter-reset-password.php?token=$token";
 
-                $success = "Password reset instructions have been sent! In a real application, this would be emailed to you.";
-                $_SESSION['reset_link'] = $reset_link;
-                $_SESSION['reset_email'] = $user_email;
+                        $success = "Password reset instructions have been sent! In a real application, this would be emailed to you.";
+                        $_SESSION['reset_link'] = $reset_link;
+                        $_SESSION['reset_email'] = $user_email;
 
-                if (function_exists('logActivity')) {
-                    @logActivity($user_id, 'twitter', 'password_reset_request', "Reset token generated for $user_email");
+                        if (function_exists('logActivity')) {
+                            @logActivity($user_id, 'twitter', 'password_reset_request', "Reset token generated for $user_email");
+                        }
+                    }
+                } else {
+                    // For security, show same message even if account doesn't exist
+                    if (!$error) {
+                        $success = "If an account exists with this email/phone, you will receive reset instructions.";
+                    }
                 }
-            }
-            } else {
-                // For security, show same message even if account doesn't exist
-                $success = "If an account exists with this email/phone, you will receive reset instructions.";
             }
         }
     }
