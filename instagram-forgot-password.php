@@ -92,18 +92,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 error_log("Database update error in instagram-forgot-password.php: " . $conn->error);
                                 $error = "A database error occurred. Please try again later.";
                             } else {
-                                // In a real app, you would email this link
-                                // For training purposes, we'll display it
-                                $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/instagram-reset-password.php?token=$token";
-
-                                $success = "Password reset instructions have been sent! In a real application, this would be emailed to you.";
-                                $_SESSION['reset_link'] = $reset_link;
-                                $_SESSION['reset_email'] = $user_email;
-
                                 // Log activity (if function exists)
                                 if (function_exists('logActivity')) {
                                     @logActivity($user_id, 'instagram', 'password_reset_request', "Reset token generated for $user_email");
                                 }
+
+                                // Redirect to reset password page automatically
+                                header('Location: instagram-reset-password.php?token=' . urlencode($token));
+                                exit;
                             }
                         } else {
                             // For security, show same message even if account doesn't exist

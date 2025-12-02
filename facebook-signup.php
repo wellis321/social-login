@@ -417,6 +417,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                             </div>
                             <p>You have successfully confirmed your account with the email <strong><?= htmlspecialchars($contact_value) ?></strong>. You will use this email address to log in.</p>
                             <form method="POST" style="text-align: right; margin-top: 20px;">
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                                 <button type="submit" class="btn btn-signup">OK</button>
                             </form>
                         </div>
@@ -434,6 +435,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                         <div style="font-size: 64px; margin-bottom: 20px;">🛡</div>
                         <h2><?= htmlspecialchars($first_name . ' ' . $last_name) ?>, confirm that you're human to use your account</h2>
                         <form method="POST" style="margin-top: 30px;">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                             <button type="submit" class="btn btn-signup btn-block">Continue</button>
                         </form>
                     </div>
