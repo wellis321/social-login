@@ -53,18 +53,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $valid_token) {
             $user_id_safe = intval($user_id);
 
             // Update password and clear reset token using prepared statement
-            $stmt = $conn->prepare("UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ? AND reset_token = ? AND platform = 'instagram'");
-            $stmt->bind_param("sis", $password_hash, $user_id_safe, $token);
+            // Update by ID only since we've already validated the token is valid
+            $stmt = $conn->prepare("UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ? AND platform = 'instagram'");
+            $stmt->bind_param("si", $password_hash, $user_id_safe);
             $update_result = $stmt->execute();
+            $affected_rows = $stmt->affected_rows;
 
-            if ($update_result) {
-                // Log activity
-                if (function_exists('logActivity') && $user_id) {
-                    @logActivity($user_id, 'instagram', 'password_reset', "Password successfully reset");
+            if ($update_result && $affected_rows > 0) {
+                // Verify the password was actually updated
+                $verify_stmt = $conn->prepare("SELECT password_hash FROM users WHERE id = ? AND platform = 'instagram'");
+                $verify_stmt->bind_param("i", $user_id_safe);
+                $verify_stmt->execute();
+                $verify_result = $verify_stmt->get_result();
+                if ($verify_result->num_rows > 0) {
+                    $verify_user = $verify_result->fetch_assoc();
+                    if (password_verify($password, $verify_user['password_hash'])) {
+                        // Password was successfully updated
+                        // Log activity
+                        if (function_exists('logActivity') && $user_id) {
+                            @logActivity($user_id, 'instagram', 'password_reset', "Password successfully reset");
+                        }
+                        $success = "Your password has been reset successfully! You can now log in with your new password.";
+                    } else {
+                        error_log("Password reset verification failed for user ID: $user_id_safe");
+                        $error = "Password update may have failed. Please try again or request a new reset link.";
+                    }
+                } else {
+                    error_log("Password reset verification: User not found after update. User ID: $user_id_safe");
+                    $error = "Password update verification failed. Please try again or request a new reset link.";
                 }
-                $success = "Your password has been reset successfully! You can now log in with your new password.";
             } else {
-                error_log("Password reset update failed: " . $conn->error);
+                error_log("Password reset update failed. Error: " . ($conn->error ?: 'No error message') . " | Affected rows: " . $affected_rows . " | User ID: $user_id_safe");
                 $error = "Failed to update password. Please try again or request a new reset link.";
             }
         }
