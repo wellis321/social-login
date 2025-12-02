@@ -1,0 +1,748 @@
+/**
+ * Facebook Platform Styling
+ * Replicates the look and feel of Facebook
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #1c1e21;
+    line-height: 1.34;
+}
+
+/* Facebook Landing Page */
+.facebook-container {
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 100px;
+}
+
+.facebook-left {
+    flex: 1;
+    max-width: 580px;
+}
+
+.facebook-logo {
+    font-size: 60px;
+    font-weight: bold;
+    color: #1877f2;
+    margin-bottom: 16px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    letter-spacing: -2px;
+}
+
+.facebook-tagline {
+    font-size: 28px;
+    line-height: 32px;
+    color: #1c1e21;
+}
+
+.facebook-right {
+    flex: 1;
+    max-width: 396px;
+}
+
+.facebook-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.facebook-card h2 {
+    font-size: 17px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #1c1e21;
+}
+
+/* Buttons */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-login {
+    background-color: #1877f2;
+    color: white;
+    margin-bottom: 16px;
+}
+
+.btn-login:hover {
+    background-color: #166fe5;
+}
+
+.btn-create {
+    background-color: #42b72a;
+    color: white;
+    font-size: 17px;
+    margin-top: 16px;
+}
+
+.btn-create:hover {
+    background-color: #36a420;
+}
+
+.btn-secondary {
+    background-color: #e4e6eb;
+    color: #1c1e21;
+}
+
+.btn-secondary:hover {
+    background-color: #d8dadf;
+}
+
+.btn-danger {
+    background-color: #f02849;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #d1243e;
+}
+
+.btn-login-submit {
+    background-color: #1877f2;
+    color: white;
+    font-weight: bold;
+}
+
+.btn-login-submit:hover {
+    background-color: #166fe5;
+}
+
+.btn-signup {
+    background-color: #00a400;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 16px;
+    margin-top: 20px;
+}
+
+.btn-signup:hover {
+    background-color: #009400;
+}
+
+.btn-create-new {
+    background-color: #42b72a;
+    color: white;
+}
+
+.btn-create-new:hover {
+    background-color: #36a420;
+}
+
+/* Separator */
+.separator {
+    margin: 16px 0;
+    text-align: center;
+    position: relative;
+}
+
+.separator::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #dadde1;
+}
+
+.separator span {
+    background: white;
+    padding: 0 10px;
+    position: relative;
+    color: #606770;
+    font-size: 14px;
+}
+
+.divider {
+    margin: 20px 0;
+    text-align: center;
+    position: relative;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #dadde1;
+}
+
+.divider span {
+    background: white;
+    padding: 0 10px;
+    position: relative;
+    color: #606770;
+    font-size: 14px;
+}
+
+/* Help Section */
+.help-section {
+    margin-top: 24px;
+    padding: 16px;
+    background-color: #f0f2f5;
+    border-radius: 8px;
+}
+
+.help-section h3 {
+    color: #1877f2;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.help-section ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.help-section li {
+    margin-bottom: 10px;
+    color: #1c1e21;
+    font-size: 14px;
+}
+
+/* Footer */
+.facebook-footer {
+    margin-top: 24px;
+    text-align: center;
+    color: #65676b;
+    font-size: 13px;
+}
+
+.facebook-footer a {
+    color: #1877f2;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.facebook-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Signup Page */
+.facebook-signup-page,
+.facebook-login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.signup-container,
+.login-container {
+    max-width: 432px;
+    width: 100%;
+}
+
+.signup-header,
+.login-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.signup-header h1,
+.login-header h1 {
+    font-size: 48px;
+    font-weight: bold;
+    color: #1877f2;
+    margin-bottom: 8px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    letter-spacing: -2px;
+}
+
+.signup-header p {
+    font-size: 17px;
+    color: #606770;
+}
+
+.signup-card,
+.login-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+}
+
+.signup-card h2,
+.login-card h2 {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #1c1e21;
+}
+
+.subtitle {
+    font-size: 15px;
+    color: #606770;
+    margin-bottom: 20px;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #606770;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="date"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #dddfe2;
+    border-radius: 6px;
+    font-size: 17px;
+    background-color: #f5f6f7;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #1877f2;
+    background-color: white;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #606770;
+}
+
+.gender-options {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #ccd0d5;
+    border-radius: 6px;
+    flex: 1;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.radio-label input[type="radio"] {
+    margin-right: 8px;
+}
+
+.radio-label:hover {
+    border-color: #1877f2;
+}
+
+/* Help and Info Boxes */
+.help-box {
+    background-color: #e7f3ff;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    border-left: 4px solid #1877f2;
+}
+
+.help-box h3,
+.help-box h4 {
+    color: #1877f2;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.help-box p {
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #1c1e21;
+}
+
+.help-box ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.help-box li {
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+    font-size: 13px;
+    color: #1c1e21;
+}
+
+.help-box li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #00a400;
+    font-weight: bold;
+}
+
+.help-box.tips {
+    background-color: #fff9e6;
+    border-left-color: #f7b500;
+}
+
+.help-box.tips h4 {
+    color: #f7b500;
+}
+
+.info-box {
+    background-color: #e7f3ff;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 16px;
+    border-left: 4px solid #1877f2;
+}
+
+.info-box p {
+    font-size: 13px;
+    color: #1c1e21;
+    margin: 0;
+}
+
+/* Error Box */
+.error-box {
+    background-color: #ffebe9;
+    border: 1px solid #f02849;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.error-box p {
+    color: #f02849;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.error-help {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f9c9c9;
+}
+
+.error-help p {
+    color: #1c1e21;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.error-help ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.error-help li {
+    color: #1c1e21;
+    font-size: 13px;
+    margin-bottom: 6px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.error-help li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #f02849;
+}
+
+/* Terms */
+.terms {
+    font-size: 11px;
+    color: #606770;
+    margin: 16px 0;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* Footer Links */
+.footer-links {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.footer-links a {
+    display: block;
+    color: #1877f2;
+    font-size: 14px;
+    text-decoration: none;
+    margin-bottom: 8px;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.secondary-link {
+    color: #65676b !important;
+    font-size: 13px !important;
+}
+
+/* Dashboard */
+.facebook-dashboard {
+    min-height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.facebook-nav {
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-logo {
+    font-size: 32px;
+    font-weight: bold;
+    color: #1877f2;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    letter-spacing: -1px;
+}
+
+.nav-user {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1c1e21;
+}
+
+.dashboard-content {
+    max-width: 800px;
+    margin: 24px auto;
+    padding: 0 16px;
+}
+
+.success-message {
+    background: linear-gradient(135deg, #1877f2 0%, #0a58ca 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.success-message h1 {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.welcome-text {
+    font-size: 18px;
+    margin-top: 8px;
+}
+
+.learning-box {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.learning-box h2 {
+    color: #1877f2;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.learning-section {
+    margin-bottom: 24px;
+}
+
+.learning-section h3 {
+    color: #1c1e21;
+    margin-bottom: 12px;
+    font-size: 18px;
+}
+
+.learning-section p {
+    color: #65676b;
+    margin-bottom: 10px;
+}
+
+.learning-section ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.learning-section li {
+    color: #1c1e21;
+    margin-bottom: 10px;
+    padding-left: 25px;
+    position: relative;
+}
+
+.learning-section li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #00a400;
+    font-weight: bold;
+}
+
+.learning-section.warning li::before {
+    content: '⚠';
+    color: #f7b500;
+}
+
+.account-info {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.account-info h3 {
+    color: #1c1e21;
+    margin-bottom: 16px;
+}
+
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.info-table tr {
+    border-bottom: 1px solid #e4e6eb;
+}
+
+.info-table td {
+    padding: 12px 0;
+    color: #1c1e21;
+}
+
+.info-table td:first-child {
+    color: #65676b;
+    width: 40%;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.action-buttons .btn {
+    flex: 1;
+    min-width: 200px;
+}
+
+.danger-zone {
+    background: #ffebe9;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #f02849;
+    margin-bottom: 24px;
+}
+
+.danger-zone h3 {
+    color: #f02849;
+    margin-bottom: 12px;
+}
+
+.danger-zone p {
+    color: #1c1e21;
+    margin-bottom: 12px;
+}
+
+.dashboard-footer {
+    text-align: center;
+    padding: 24px;
+    color: #65676b;
+    font-size: 13px;
+    background: white;
+    margin-top: 24px;
+}
+
+.dashboard-footer p {
+    margin-bottom: 6px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .facebook-container {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .facebook-left {
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .facebook-logo {
+        font-size: 48px;
+    }
+
+    .facebook-tagline {
+        font-size: 20px;
+        line-height: 24px;
+    }
+
+    .signup-header h1,
+    .login-header h1 {
+        font-size: 36px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons .btn {
+        min-width: 100%;
+    }
+
+    .gender-options {
+        flex-direction: column;
+    }
+
+    .success-message h1 {
+        font-size: 24px;
+    }
+}
