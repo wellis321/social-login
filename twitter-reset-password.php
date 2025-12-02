@@ -13,6 +13,7 @@ $success = '';
 $token = $_GET['token'] ?? '';
 $valid_token = false;
 $user_email = '';
+$user_id = null;
 
 if (empty($token)) {
     $error = "Invalid or missing reset token";
@@ -26,6 +27,7 @@ if (empty($token)) {
     if ($result && $result->num_rows > 0) {
         $valid_token = true;
         $user_data = $result->fetch_assoc();
+        $user_id = $user_data['id'];
         $user_email = $user_data['email'];
     } else {
         $error = "This reset link has expired or is invalid. Please request a new one.";
@@ -46,25 +48,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $valid_token) {
         $conn = getDbConnection();
         $token_safe = $conn->real_escape_string($token);
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
+        $user_id_safe = intval($user_id);
 
-        // Update password and clear reset token
-        $update_result = $conn->query("UPDATE users SET password_hash = '$password_hash', reset_token = NULL, reset_token_expires = NULL WHERE reset_token = '$token_safe' AND platform = 'twitter'");
+        // Update password and clear reset token using user_id (more reliable than token after update)
+        $update_result = $conn->query("UPDATE users SET password_hash = '$password_hash', reset_token = NULL, reset_token_expires = NULL WHERE id = $user_id_safe AND reset_token = '$token_safe' AND platform = 'twitter'");
 
         if ($update_result) {
-            // Get user ID for logging
-            $token_result = $conn->query("SELECT id FROM users WHERE reset_token = '$token_safe' AND platform = 'twitter'");
-            $user_id = null;
-            if ($token_result && $token_result->num_rows > 0) {
-                $token_user = $token_result->fetch_assoc();
-                $user_id = $token_user['id'];
-            }
-
+            // Log activity
             if (function_exists('logActivity') && $user_id) {
                 @logActivity($user_id, 'twitter', 'password_reset', "Password successfully reset for $user_email");
             }
+            $success = "Your password has been reset successfully! You can now log in with your new password.";
+        } else {
+            error_log("Password reset update failed: " . $conn->error);
+            $error = "Failed to update password. Please try again or request a new reset link.";
         }
-
-        $success = "Your password has been reset successfully! You can now log in with your new password.";
     }
 }
 ?>
