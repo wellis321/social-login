@@ -2,161 +2,138 @@
 
 This guide will help you deploy the Social Login Training Simulator to your Hostinger hosting account.
 
-## Quick Start
+## Overview
 
-Your Hostinger site is currently showing a 403 error because the files need to be properly configured. Follow these steps:
+The project structure is now **flat** - all files are in the root directory. This makes deployment to Hostinger simple: just upload and configure your database.
 
-### Option 1: Root Installation (Recommended for Hostinger)
+## Deployment Steps
 
-1. **Upload files via File Manager or FTP to `public_html/`:**
+### 1. Upload Files to Hostinger
+
+Using **Hostinger File Manager** or **FTP**:
+
+1. Go to Hostinger control panel → File Manager
+2. Navigate to `public_html/`
+3. Upload **all files and folders** from your local project:
    ```
    public_html/
-   ├── admin/
-   ├── assets/
-   ├── config/
-   ├── includes/
-   ├── index.php
+   ├── admin/               ← Upload this folder
+   ├── assets/              ← Upload this folder
+   ├── config/              ← Upload this folder
+   ├── includes/            ← Upload this folder
+   ├── index.php            ← Upload all .php files
    ├── twitter.php
    ├── facebook.php
    ├── instagram.php
-   ├── (all other .php files)
+   ├── ... (all other .php files)
    └── .htaccess
    ```
 
-2. **Update file paths in PHP files:**
-   - All files in root: Change `../config` to `config` and `../includes` to `includes`
-   - All files in admin/: Change `../../config` to `../config` and `../../includes` to `../includes`
+### 2. Configure Database Credentials
 
-3. **Create `.env` file in `public_html/config/.env`:**
+1. **Find your Hostinger database credentials:**
+   - Hostinger Control Panel → **Databases** → **MySQL Databases**
+   - Note these values:
+     - Database Host (usually `localhost`)
+     - Database Name (e.g., `u123456789_social_login`)
+     - Database Username (e.g., `u123456789_user`)
+     - Database Password (the one you set)
+
+2. **Create `.env` file:**
+   - In File Manager, navigate to `public_html/config/`
+   - Create a new file called `.env`
+   - Add your credentials:
    ```env
    DB_HOST=localhost
-   DB_USER=your_hostinger_db_user
-   DB_PASS=your_hostinger_db_password
-   DB_NAME=your_hostinger_db_name
+   DB_USER=u123456789_user
+   DB_PASS=YourSecurePassword123
+   DB_NAME=u123456789_social_login
    ```
 
-4. **Run database setup:**
-   - Via browser: Navigate to `https://your-site.com/config/create_database.php`
-   - Then: Navigate to `https://your-site.com/config/setup.php`
-   - Or via SSH/Terminal:
-     ```bash
-     php config/create_database.php
-     php config/setup.php
-     ```
+### 3. Initialize Database
 
-### Option 2: Subdirectory Installation
-
-If you want to keep the project structure as-is with the `public/` directory:
-
-1. **Upload entire project to Hostinger**
-
-2. **Point document root to `public/` directory:**
-   - In Hostinger control panel, go to **Website Settings**
-   - Change the **Document Root** to `/public`
-   - Or use the `.htaccess` file in the root (already included) to redirect
-
-3. **Create `.env` file in `config/.env`** (same as above)
-
-4. **Run database setup** (same as above)
-
-## Database Configuration
-
-### Finding Your Hostinger Database Credentials
-
-1. Log in to Hostinger control panel
-2. Go to **Databases** → **MySQL Databases**
-3. Note your database credentials:
-   - Database Host: Usually `localhost`
-   - Database Name: Listed in the databases section
-   - Database Username: Listed in the databases section
-   - Database Password: Use the one you set when creating the database
-
-### Creating the Database Tables
-
-After uploading files and configuring `.env`:
-
-**Via Web Browser:**
+**Option A - Via Web Browser (Easiest):**
 ```
-https://your-site.hostingersite.com/config/setup.php
+https://olive-goldfinch-502177.hostingersite.com/config/setup.php
 ```
 
-**Via SSH (if available):**
+You should see: "✓ Database initialized successfully!"
+
+**Option B - Via SSH (if you have access):**
 ```bash
-cd /home/username/public_html
+cd public_html
 php config/create_database.php
 php config/setup.php
 ```
 
-## Default Admin Credentials
+### 4. Test Your Site
 
-After running setup, you can access the admin panel:
+Visit: `https://olive-goldfinch-502177.hostingersite.com/`
 
-- URL: `https://your-site.com/admin/`
+You should see the platform selection page with Twitter, Facebook, and Instagram options.
+
+### 5. Access Admin Panel
+
+- URL: `https://olive-goldfinch-502177.hostingersite.com/admin/`
 - Username: `admin`
 - Password: `admin123`
 
-**⚠️ IMPORTANT: Change these credentials immediately after first login!**
+**⚠️ IMPORTANT: Change the admin password immediately!**
 
 ## File Permissions
 
-Make sure these permissions are set correctly:
+Hostinger usually sets these automatically, but verify:
 
 ```bash
-chmod 755 public_html/
-chmod 644 public_html/*.php
-chmod 755 public_html/admin/
-chmod 644 public_html/admin/*.php
-chmod 755 public_html/assets/
-chmod 644 public_html/assets/css/*
-chmod 600 public_html/config/.env  # Keep .env secure
+Files (.php, .css): 644
+Directories: 755
+.env file: 600 (most secure)
 ```
 
 ## Troubleshooting
 
-### 403 Forbidden Error
-- Check that `index.php` exists in your document root
-- Check file permissions (should be 644 for files, 755 for directories)
-- Verify `.htaccess` is present and `mod_rewrite` is enabled
+### Site Shows 403 Forbidden
+- Ensure `index.php` exists in `public_html/`
+- Check that `.htaccess` was uploaded
+- Verify file permissions (644 for files, 755 for folders)
 
-### 500 Internal Server Error
-- Check PHP error logs in Hostinger control panel
-- Verify `.env` file has correct database credentials
-- Ensure all required PHP extensions are installed (mysqli, pdo)
+### Site Shows 500 Internal Server Error
+- Check Hostinger error logs (Control Panel → Error Logs)
+- Verify `.htaccess` syntax
+- Ensure PHP version is 7.4 or higher (Control Panel → PHP Configuration)
 
-### Database Connection Errors
-- Double-check database credentials in `.env`
-- Verify database exists in Hostinger MySQL databases
-- Test connection using Hostinger's phpMyAdmin
+### Database Connection Error
+- Verify database credentials in `.env` file
+- Check that database exists in Hostinger MySQL Databases section
+- Test connection using phpMyAdmin (in Hostinger control panel)
 
 ### Cannot Access Admin Panel
-- Make sure you ran `config/setup.php` to create admin account
+- Ensure you ran `config/setup.php` to create the admin account
+- Try accessing directly: `/admin/index.php`
 - Clear browser cache
-- Try accessing directly: `https://your-site.com/admin/index.php`
+
+### CSS Not Loading
+- Check that `assets/` folder was uploaded correctly
+- Verify file permissions on CSS files (should be 644)
+- Check browser console for 404 errors
 
 ## Security Checklist
 
 Before going live:
 
-- [ ] Change default admin password
-- [ ] Ensure `.env` is not accessible via browser (should return 403)
-- [ ] Remove or protect `config/setup.php` after initial setup
+- [ ] Change default admin password (`admin/admin123`)
+- [ ] Verify `.env` file is not accessible via browser
+- [ ] Delete or protect `config/setup.php` and `config/create_database.php` after setup
 - [ ] Enable HTTPS (usually automatic on Hostinger)
 - [ ] Review file permissions
-- [ ] Test all three platforms (Twitter, Facebook, Instagram)
+- [ ] Test all three platforms
 - [ ] Test password recovery flows
 
-## Need Help?
+## Local vs Production Configuration
 
-If you encounter issues:
+The code is identical for both environments - only the `.env` file differs!
 
-1. Check Hostinger's error logs in the control panel
-2. Verify all files uploaded correctly
-3. Test database connection using phpMyAdmin
-4. Contact Hostinger support if server configuration is needed
-
-## Local Development vs Production
-
-**Local (.env):**
+**Local `.env`:**
 ```env
 DB_HOST=localhost
 DB_USER=root
@@ -164,7 +141,7 @@ DB_PASS=
 DB_NAME=social_login
 ```
 
-**Hostinger (.env):**
+**Hostinger `.env`:**
 ```env
 DB_HOST=localhost
 DB_USER=u123456789_social
@@ -172,4 +149,41 @@ DB_PASS=YourSecurePassword123
 DB_NAME=u123456789_social_login
 ```
 
-Remember: **NEVER** commit your production `.env` file to Git!
+**Remember:** NEVER commit your `.env` file to Git!
+
+## Updating Your Site
+
+When you make changes locally and want to deploy:
+
+1. Commit and push to GitHub:
+   ```bash
+   git add -A
+   git commit -m "Your changes"
+   git push origin main
+   ```
+
+2. On Hostinger, pull the changes:
+   - If you have SSH access: `git pull origin main`
+   - Or use File Manager to upload changed files
+
+3. If you changed the database schema, run:
+   ```
+   https://your-site.com/config/setup.php
+   ```
+
+## Need Help?
+
+- Check Hostinger error logs in control panel
+- Test database connection with phpMyAdmin
+- Review file permissions
+- Contact Hostinger support for server issues
+
+## Quick Reference
+
+| What | Where | Default Value |
+|------|-------|---------------|
+| Site URL | Hostinger domain | https://olive-goldfinch-502177.hostingersite.com/ |
+| Admin Panel | /admin/ | Username: admin / Password: admin123 |
+| Database Config | config/.env | Update with Hostinger credentials |
+| PHP Version | Hostinger PHP Settings | Requires 7.4+ |
+| Document Root | Hostinger Settings | public_html/ |

@@ -47,12 +47,11 @@ A training tool for Duke of Edinburgh Awards staff to practice and teach social 
    ```
 
 5. **Start your web server**
-   - Point your web server document root to the `public/` directory
-   - Or use PHP's built-in server for testing:
+   - Use PHP's built-in server for local testing:
      ```bash
-     cd public
      php -S localhost:8000
      ```
+   - Or configure your web server (Apache, Nginx) to point to the project root
 
 6. **Access the application**
    - Navigate to `http://localhost:8000` in your browser
@@ -67,12 +66,14 @@ A training tool for Duke of Edinburgh Awards staff to practice and teach social 
 ## Project Structure
 
 ```
-/public            - Web-accessible files (entry point)
-  /assets          - CSS, JavaScript, images (publicly accessible)
-/includes          - PHP business logic and helper functions
-/templates         - HTML templates for each platform
-/admin             - Admin panel files
-/config            - Database configuration
+/
+├── index.php           - Main entry point (platform selection)
+├── *.php               - Platform-specific pages (twitter.php, facebook.php, etc.)
+├── /admin              - Admin panel files
+├── /assets             - CSS, JavaScript, images
+├── /config             - Database configuration and .env
+├── /includes           - PHP helper functions
+└── .htaccess           - Web server configuration
 ```
 
 ## Usage

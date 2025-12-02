@@ -1,12 +1,12 @@
 <?php
 /**
- * Twitter/X Forgot Password
+ * Facebook Forgot Password
  * Request password reset email
  */
 
 session_start();
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/functions.php';
 
 $error = '';
 $success = '';
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email_safe = $conn->real_escape_string($email);
 
         // Check if account exists
-        $result = $conn->query("SELECT id FROM users WHERE email = '$email_safe' AND platform = 'twitter'");
+        $result = $conn->query("SELECT id FROM users WHERE email = '$email_safe' AND platform = 'facebook'");
 
         if ($result->num_rows > 0) {
             // Generate reset token
@@ -31,16 +31,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
             // Store token
-            $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE email = '$email_safe' AND platform = 'twitter'");
+            $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE email = '$email_safe' AND platform = 'facebook'");
 
             // In a real app, you would email this link
             // For training purposes, we'll display it
-            $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/twitter-reset-password.php?token=$token";
+            $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/facebook-reset-password.php?token=$token";
 
             $success = "Password reset instructions have been sent! In a real application, this would be emailed to you.";
             $_SESSION['reset_link'] = $reset_link;
 
-            logActivity($result->fetch_assoc()['id'], 'twitter', 'password_reset_request', "Reset token generated for $email");
+            logActivity($result->fetch_assoc()['id'], 'facebook', 'password_reset_request', "Reset token generated for $email");
         } else {
             // For security, show same message even if account doesn't exist
             $success = "If an account exists with this email, you will receive reset instructions.";
@@ -53,13 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot Password - X</title>
-    <link rel="stylesheet" href="assets/css/twitter.css">
+    <title>Forgot Password - Facebook</title>
+    <link rel="stylesheet" href="assets/css/facebook.css">
 </head>
 <body>
-    <div class="twitter-container centered">
-        <div class="twitter-login-card">
-            <div class="twitter-logo-small">𝕏</div>
+    <div class="facebook-container centered">
+        <div class="facebook-login-card">
+            <div class="facebook-logo-small">facebook</div>
             <h1>Forgot Password?</h1>
             <p>Enter your email address and we'll help you reset your password.</p>
 
@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <h3>📧 Training Mode - Password Reset Link</h3>
                             <p>In a real application, this link would be emailed to you. Click below to reset your password:</p>
                             <a href="<?= htmlspecialchars($_SESSION['reset_link']) ?>" class="btn btn-primary btn-block" style="margin-top: 12px;">Reset My Password</a>
-                            <p style="margin-top: 12px; font-size: 12px; color: #71767b;">This link expires in 1 hour.</p>
+                            <p style="margin-top: 12px; font-size: 12px; color: #65676b;">This link expires in 1 hour.</p>
                         </div>
                         <?php unset($_SESSION['reset_link']); ?>
                     <?php endif; ?>
@@ -107,8 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <div class="footer-links">
-                <a href="twitter-login.php">← Back to Login</a> •
-                <a href="twitter-forgot-username.php">Forgot Username?</a>
+                <a href="facebook-login.php">← Back to Login</a>
             </div>
         </div>
     </div>
