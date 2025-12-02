@@ -58,6 +58,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = "Username is required";
         } elseif (!preg_match('/^[a-zA-Z0-9_]{3,15}$/', $username)) {
             $errors[] = "Username must be 3-15 characters, letters, numbers, and underscores only";
+        } else {
+            // Check if username is already taken
+            $conn = getDbConnection();
+            $username_check = $conn->real_escape_string($username);
+            $result = $conn->query("SELECT id FROM users WHERE username = '$username_check' AND platform = 'twitter'");
+            if ($result->num_rows > 0) {
+                $errors[] = "This username is already taken. Please choose a different one.";
+            }
         }
         if (empty($dob)) {
             $errors[] = "Date of birth is required";
@@ -192,6 +200,7 @@ $email = $_SESSION['signup_data']['email'] ?? '';
                     <p><strong>Username:</strong> This is how people will find you on X. It appears as @username</p>
                     <p><strong>Name:</strong> Your full name or the name you want to display</p>
                     <p><strong>Date of birth:</strong> You must be 13 years or older to use X</p>
+                    <p class="warning-text">⚠️ <strong>IMPORTANT:</strong> Your username must be unique - no one else can have the same username!</p>
                     <p><strong>Privacy tip:</strong> You can change your display name later, but your username is permanent!</p>
                 </div>
 
@@ -203,13 +212,13 @@ $email = $_SESSION['signup_data']['email'] ?? '';
                     </div>
 
                     <div class="form-group">
-                        <label for="username">Username *</label>
+                        <label for="username">Username * <span style="color: #f91880;">(must be unique)</span></label>
                         <div class="input-with-prefix">
                             <span class="prefix">@</span>
                             <input type="text" id="username" name="username"
                                    placeholder="username" pattern="[a-zA-Z0-9_]{3,15}" required>
                         </div>
-                        <small>3-15 characters, letters, numbers, and underscores only</small>
+                        <small>3-15 characters, letters, numbers, and underscores only. Must be unique!</small>
                     </div>
 
                     <div class="form-group">

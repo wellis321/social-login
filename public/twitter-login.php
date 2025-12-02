@@ -101,6 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" class="btn btn-primary btn-block">Sign in</button>
             </form>
 
+            <div class="footer-links" style="margin-top: 16px;">
+                <a href="twitter-forgot-password.php">Forgot password?</a> •
+                <a href="twitter-forgot-username.php">Forgot username?</a>
+            </div>
+
             <div class="divider">
                 <span>or</span>
             </div>

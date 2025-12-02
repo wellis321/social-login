@@ -34,6 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Username is required";
     } elseif (!preg_match('/^[a-zA-Z0-9._]{1,30}$/', $username)) {
         $errors[] = "Username can only contain letters, numbers, periods, and underscores (max 30 characters)";
+    } else {
+        // Check if username is already taken
+        $conn = getDbConnection();
+        $username_check = $conn->real_escape_string($username);
+        $result = $conn->query("SELECT id FROM users WHERE username = '$username_check' AND platform = 'instagram'");
+        if ($result->num_rows > 0) {
+            $errors[] = "This username is already taken. Please choose a different one.";
+        }
     }
 
     if (empty($password)) {
@@ -97,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <li><strong>Username:</strong> Your unique @username (this is how people find you)</li>
                         <li><strong>Password:</strong> At least 6 characters to keep your account secure</li>
                     </ul>
+                    <p style="color: #ed4956; font-weight: 600; margin-top: 12px;">⚠️ Your username must be UNIQUE - no one else can have the same username!</p>
                 </div>
 
                 <form method="POST">
@@ -117,9 +126,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-group">
                         <input type="text" name="username"
                                value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
-                               placeholder="Username"
+                               placeholder="Username (must be unique)"
                                pattern="[a-zA-Z0-9._]{1,30}" required>
-                        <small>Letters, numbers, periods, and underscores only (max 30 characters)</small>
+                        <small>Letters, numbers, periods, and underscores only (max 30 characters). <strong style="color: #ed4956;">Must be unique!</strong></small>
                     </div>
 
                     <div class="form-group">
@@ -133,7 +142,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <ul>
                             <li>Choose something memorable and easy to share</li>
                             <li>Your username appears in your profile URL</li>
-                            <li>It must be unique - no one else can have it</li>
+                            <li><strong style="color: #ed4956;">⚠️ It MUST be unique - no one else can have it!</strong></li>
+                            <li>If your username is taken, try adding numbers or underscores</li>
                             <li>You can change it later in settings</li>
                         </ul>
                     </div>

@@ -112,6 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="footer-links">
+                <a href="instagram-forgot-password.php">Forgot password?</a> •
+                <a href="instagram-forgot-username.php">Forgot username?</a> •
                 <a href="instagram.php">← Back to Instagram home</a>
             </div>
         </div>

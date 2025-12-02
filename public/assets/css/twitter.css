@@ -404,6 +404,12 @@ body {
     color: #1d9bf0;
 }
 
+/* Warning Text */
+.warning-text {
+    color: #f91880 !important;
+    font-weight: 600;
+}
+
 /* Error Box */
 .error-box {
     background-color: #2f1618;
@@ -415,6 +421,20 @@ body {
 
 .error-box p {
     color: #f4212e;
+    margin-bottom: 8px;
+}
+
+/* Success Box */
+.success-box {
+    background-color: #0d2818;
+    border: 1px solid #00ba7c;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.success-box p {
+    color: #00ba7c;
     margin-bottom: 8px;
 }
 

@@ -394,6 +394,21 @@ body {
     margin-bottom: 6px;
 }
 
+/* Success Box */
+.success-box {
+    background-color: #d4edda;
+    border: 1px solid #28a745;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+
+.success-box p {
+    color: #155724;
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
 .error-help {
     margin-top: 10px;
     padding-top: 10px;

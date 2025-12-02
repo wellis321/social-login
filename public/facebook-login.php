@@ -113,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="footer-links">
+                    <a href="facebook-forgot-password.php">Forgot password?</a> •
                     <a href="facebook.php">← Back to Facebook home</a>
                 </div>
             </div>
