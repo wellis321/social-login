@@ -122,10 +122,13 @@ main {
 }
 
 .instagram-logo-img {
-    width: 64px;
-    height: 64px;
+    width: 64px !important;
+    height: 64px !important;
+    max-width: 64px !important;
+    max-height: 64px !important;
     object-fit: contain;
     margin: 0 auto;
+    flex-shrink: 0;
 }
 
 .platform-card.twitter .platform-icon {
