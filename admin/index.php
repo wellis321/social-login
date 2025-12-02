@@ -26,9 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($username) || empty($password)) {
             $error = "Please enter both username and password";
         } else {
-            // Check rate limit (5 attempts per 15 minutes)
-            if (!checkRateLimit('admin_login', $username, 5, 900)) {
-                $error = "Too many login attempts. Please wait 15 minutes before trying again.";
+            // Check rate limit (50 attempts per 10 minutes for training)
+            if (!checkRateLimit('admin_login', $username, 50, 600)) {
+                $error = "Too many login attempts. Please wait 10 minutes before trying again.";
             } else {
                 $conn = getDbConnection();
                 $stmt = $conn->prepare("SELECT id, password_hash FROM admin_users WHERE username = ? AND is_active = 1");

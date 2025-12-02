@@ -20,9 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($email) || empty($password)) {
             $errors[] = "Please enter both email/phone and password";
         } else {
-            // Check rate limit (5 attempts per 15 minutes)
-            if (!checkRateLimit('login', $email, 5, 900)) {
-                $errors[] = "Too many login attempts. Please wait 15 minutes before trying again.";
+            // Check rate limit (100 attempts per 10 minutes for training)
+            if (!checkRateLimit('login', $email, 100, 600)) {
+                $errors[] = "Too many login attempts. Please wait 10 minutes before trying again.";
             } else {
                 $user_id = authenticateUser($email, $password, 'facebook');
 

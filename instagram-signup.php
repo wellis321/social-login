@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $full_name = sanitizeInput($_POST['full_name'] ?? '');
             $username = sanitizeInput($_POST['username'] ?? '');
 
-            // Check rate limit for signup (3 attempts per 15 minutes)
-            if (!checkRateLimit('signup', $contact_value, 3, 900)) {
-                $errors[] = "Too many signup attempts. Please wait 15 minutes before trying again.";
+            // Check rate limit for signup (50 attempts per 10 minutes for training)
+            if (!checkRateLimit('signup', $contact_value, 50, 600)) {
+                $errors[] = "Too many signup attempts. Please wait 10 minutes before trying again.";
             } else {
                 if (empty($contact_value)) {
                     $errors[] = "Mobile number or email address is required";

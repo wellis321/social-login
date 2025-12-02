@@ -19,9 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($contact_value)) {
             $error = "Email address or phone number is required";
         } else {
-            // Check rate limit (3 attempts per 15 minutes)
-            if (!checkRateLimit('password_reset', $contact_value, 3, 900)) {
-                $error = "Too many password reset requests. Please wait 15 minutes before trying again.";
+            // Check rate limit (20 attempts per 10 minutes for training)
+            if (!checkRateLimit('password_reset', $contact_value, 20, 600)) {
+                $error = "Too many password reset requests. Please wait 10 minutes before trying again.";
             } else {
                 $conn = getDbConnection();
                 $input = trim($contact_value);

@@ -21,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $contact_type = $_POST['contact_type'] ?? 'email';
             $contact_value = sanitizeInput($_POST['contact_value']);
 
-            // Check rate limit for signup (3 attempts per 15 minutes)
-            if (!checkRateLimit('signup', $contact_value, 3, 900)) {
-                $errors[] = "Too many signup attempts. Please wait 15 minutes before trying again.";
+            // Check rate limit for signup (50 attempts per 10 minutes for training)
+            if (!checkRateLimit('signup', $contact_value, 50, 600)) {
+                $errors[] = "Too many signup attempts. Please wait 10 minutes before trying again.";
             } else {
                 if (empty($contact_value)) {
                     $errors[] = $contact_type === 'email' ? "Email is required" : "Phone number is required";
