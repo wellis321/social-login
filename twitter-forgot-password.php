@@ -4,6 +4,10 @@
  * Request password reset email
  */
 
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
@@ -32,12 +36,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Try exact match first
         $result = $conn->query("SELECT id, email FROM users WHERE email = '$input_safe' AND platform = 'twitter'");
 
+        // Check if query failed
+        if (!$result) {
+            $error = "Database error occurred. Please try again.";
+        }
         // If no match and it might be a phone, try to find by normalized phone
-        if ($result && $result->num_rows === 0) {
-            // Try phone number matching if functions exist
+        elseif ($result->num_rows === 0) {
+            // Try phone number matching if functions exist and input was normalized (meaning it's a phone)
             if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
+                // Check if original input was a phone number
                 if (isPhoneNumber($contact_value)) {
-                    $normalized_input = normalizePhone($contact_value);
+                    // We already normalized $input above, so use that
+                    $normalized_input = $input;
                     $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'twitter'");
 
                     if ($all_users) {
@@ -55,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        if ($result && $result->num_rows > 0) {
+        if (!$error && $result && $result->num_rows > 0) {
             $user_data = $result->fetch_assoc();
             $user_id = $user_data['id'];
             $user_email = $user_data['email'];
