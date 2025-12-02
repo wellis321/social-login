@@ -342,20 +342,40 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                     </div>
 
                     <script>
-                    // Ensure FB- prefix is always present
+                    // Ensure FB- prefix is always present and only allow numbers after it
                     const codeInput = document.getElementById('verification_code');
                     codeInput.addEventListener('input', function(e) {
                         let value = e.target.value;
-                        if (!value.startsWith('FB-')) {
-                            value = 'FB-' + value.replace(/^FB-/, '');
+
+                        // Remove everything except FB- prefix and numbers
+                        const prefix = 'FB-';
+                        let numbers = value.replace(/^FB-/, '').replace(/[^0-9]/g, '');
+
+                        // Limit to 5 digits after FB-
+                        if (numbers.length > 5) {
+                            numbers = numbers.substring(0, 5);
                         }
-                        // Only allow numbers after FB-
-                        value = value.replace(/^FB-/, 'FB-').replace(/[^0-9]/g, '');
-                        if (value.length > 3) {
-                            value = 'FB-' + value.substring(3).replace(/[^0-9]/g, '');
-                        }
-                        if (value.length > 9) value = value.substring(0, 9);
+
+                        // Reconstruct value with prefix
+                        value = prefix + numbers;
                         e.target.value = value;
+                    });
+
+                    // Handle paste events
+                    codeInput.addEventListener('paste', function(e) {
+                        e.preventDefault();
+                        let pasted = (e.clipboardData || window.clipboardData).getData('text');
+
+                        // Extract numbers from pasted text
+                        let numbers = pasted.replace(/^FB-?/i, '').replace(/[^0-9]/g, '');
+
+                        // Limit to 5 digits
+                        if (numbers.length > 5) {
+                            numbers = numbers.substring(0, 5);
+                        }
+
+                        // Set value with FB- prefix
+                        e.target.value = 'FB-' + numbers;
                     });
                     </script>
 
