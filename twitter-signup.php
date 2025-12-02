@@ -4,9 +4,7 @@
  * Multi-step registration with educational guidance and verification simulation
  */
 
-session_start();
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/security.php';
 
 $errors = [];
 $success = false;
@@ -14,10 +12,19 @@ $step = isset($_GET['step']) ? intval($_GET['step']) : 1;
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($step === 1) {
-        // Step 1: Email/Phone choice and validation
-        $contact_type = $_POST['contact_type'] ?? 'email';
-        $contact_value = sanitizeInput($_POST['contact_value']);
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $errors[] = "Invalid security token. Please refresh the page and try again.";
+    } else {
+        if ($step === 1) {
+            // Step 1: Email/Phone choice and validation
+            $contact_type = $_POST['contact_type'] ?? 'email';
+            $contact_value = sanitizeInput($_POST['contact_value']);
+
+            // Check rate limit for signup (3 attempts per 15 minutes)
+            if (!checkRateLimit('signup', $contact_value, 3, 900)) {
+                $errors[] = "Too many signup attempts. Please wait 15 minutes before trying again.";
+            } else {
 
         if (empty($contact_value)) {
             $errors[] = $contact_type === 'email' ? "Email is required" : "Phone number is required";
@@ -26,95 +33,101 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($contact_type === 'email' && userExists($contact_value, 'twitter')) {
             $errors[] = "An account with this email already exists. Try logging in instead.";
         } else {
-            $_SESSION['signup_data']['contact_type'] = $contact_type;
-            $_SESSION['signup_data']['email'] = $contact_value;
-            // Generate a fake verification code for training
-            $_SESSION['signup_data']['verification_code'] = sprintf('%06d', mt_rand(0, 999999));
-            header('Location: twitter-signup.php?step=2');
-            exit;
-        }
-    } elseif ($step === 2) {
-        // Step 2: Verification code
-        $entered_code = sanitizeInput($_POST['verification_code']);
-        $expected_code = $_SESSION['signup_data']['verification_code'] ?? '';
-
-        if (empty($entered_code)) {
-            $errors[] = "Verification code is required";
-        } elseif ($entered_code !== $expected_code) {
-            $errors[] = "Incorrect verification code. Please try again.";
-        } else {
-            $_SESSION['signup_data']['verified'] = true;
-            header('Location: twitter-signup.php?step=3');
-            exit;
-        }
-    } elseif ($step === 3) {
-        // Step 3: Password creation
-        $password = $_POST['password'];
-        $confirm_password = $_POST['confirm_password'];
-
-        if (empty($password)) {
-            $errors[] = "Password is required";
-        } elseif (strlen($password) < 8) {
-            $errors[] = "Password must be at least 8 characters long";
-        } elseif ($password !== $confirm_password) {
-            $errors[] = "Passwords do not match";
-        } else {
-            $_SESSION['signup_data']['password'] = $password;
-            header('Location: twitter-signup.php?step=4');
-            exit;
-        }
-    } elseif ($step === 4) {
-        // Step 4: Profile information
-        $full_name = sanitizeInput($_POST['full_name']);
-        $username = sanitizeInput($_POST['username']);
-        $dob = sanitizeInput($_POST['date_of_birth']);
-
-        if (empty($full_name)) {
-            $errors[] = "Name is required";
-        }
-        if (empty($username)) {
-            $errors[] = "Username is required";
-        } elseif (!preg_match('/^[a-zA-Z0-9_]{3,15}$/', $username)) {
-            $errors[] = "Username must be 3-15 characters, letters, numbers, and underscores only";
-        } else {
-            // Check if username is already taken
-            $conn = getDbConnection();
-            $username_check = $conn->real_escape_string($username);
-            $result = $conn->query("SELECT id FROM users WHERE username = '$username_check' AND platform = 'twitter'");
-            if ($result->num_rows > 0) {
-                $errors[] = "This username is already taken. Please choose a different one.";
-            }
-        }
-        if (empty($dob)) {
-            $errors[] = "Date of birth is required";
-        }
-
-        if (empty($errors)) {
-            // Create the account
-            $userData = [
-                'email' => $_SESSION['signup_data']['email'],
-                'password' => $_SESSION['signup_data']['password'],
-                'full_name' => $full_name,
-                'username' => $username,
-                'date_of_birth' => $dob
-            ];
-
-            if (createUser('twitter', $userData)) {
-                $user_id = getUserById($userData['email']);
-                logActivity($user_id['id'] ?? null, 'twitter', 'register', 'New account created');
-
-                $_SESSION['user_id'] = $user_id['id'];
-                $_SESSION['platform'] = 'twitter';
-                unset($_SESSION['signup_data']);
-
-                header('Location: twitter-dashboard.php');
+                $_SESSION['signup_data']['contact_type'] = $contact_type;
+                $_SESSION['signup_data']['email'] = $contact_value;
+                // Generate a fake verification code for training
+                $_SESSION['signup_data']['verification_code'] = sprintf('%06d', mt_rand(0, 999999));
+                header('Location: twitter-signup.php?step=2');
                 exit;
+            }
+        } elseif ($step === 2) {
+            // Step 2: Verification code
+            $entered_code = sanitizeInput($_POST['verification_code']);
+            $expected_code = $_SESSION['signup_data']['verification_code'] ?? '';
+
+            if (empty($entered_code)) {
+                $errors[] = "Verification code is required";
+            } elseif ($entered_code !== $expected_code) {
+                $errors[] = "Incorrect verification code. Please try again.";
             } else {
-                $errors[] = "Failed to create account. Please try again.";
+                $_SESSION['signup_data']['verified'] = true;
+                header('Location: twitter-signup.php?step=3');
+                exit;
+            }
+            } elseif ($step === 3) {
+            // Step 3: Password creation
+            $password = $_POST['password'];
+            $confirm_password = $_POST['confirm_password'];
+
+            if (empty($password)) {
+                $errors[] = "Password is required";
+            } elseif (strlen($password) < 8) {
+                $errors[] = "Password must be at least 8 characters long";
+            } elseif ($password !== $confirm_password) {
+                $errors[] = "Passwords do not match";
+            } else {
+                $_SESSION['signup_data']['password'] = $password;
+                header('Location: twitter-signup.php?step=4');
+                exit;
+            }
+            } elseif ($step === 4) {
+            // Step 4: Profile information
+            $full_name = sanitizeInput($_POST['full_name']);
+            $username = sanitizeInput($_POST['username']);
+            $dob = sanitizeInput($_POST['date_of_birth']);
+
+            if (empty($full_name)) {
+                $errors[] = "Name is required";
+            }
+            if (empty($username)) {
+                $errors[] = "Username is required";
+            } elseif (!preg_match('/^[a-zA-Z0-9_]{3,15}$/', $username)) {
+                $errors[] = "Username must be 3-15 characters, letters, numbers, and underscores only";
+            } else {
+                // Check if username is already taken using prepared statement
+                $conn = getDbConnection();
+                $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? AND platform = 'twitter'");
+                $stmt->bind_param("s", $username);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result->num_rows > 0) {
+                    $errors[] = "This username is already taken. Please choose a different one.";
+                }
+            }
+            if (empty($dob)) {
+                $errors[] = "Date of birth is required";
+            }
+
+            if (empty($errors)) {
+                // Create the account
+                $userData = [
+                    'email' => $_SESSION['signup_data']['email'],
+                    'password' => $_SESSION['signup_data']['password'],
+                    'full_name' => $full_name,
+                    'username' => $username,
+                    'date_of_birth' => $dob
+                ];
+
+                if (createUser('twitter', $userData)) {
+                    $user = getUserById($userData['email']);
+                    $user_id = $user ? $user['id'] : null;
+                    logActivity($user_id, 'twitter', 'register', 'New account created');
+
+                    $_SESSION['user_id'] = $user_id;
+                    $_SESSION['platform'] = 'twitter';
+                    unset($_SESSION['signup_data']);
+
+                    header('Location: twitter-dashboard.php');
+                    exit;
+                } else {
+                    $errors[] = "Failed to create account. Please try again.";
+                }
             }
         }
     }
 }
+
+$csrf_token = generateCSRFToken();
 
 // Get stored data
 $email = $_SESSION['signup_data']['email'] ?? '';
@@ -170,6 +183,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
                 </div>
 
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                     <div class="form-group">
                         <label>Choose how to sign up:</label>
                         <select name="contact_type" id="contact_type" onchange="updatePlaceholder()">
@@ -230,6 +244,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
                 </div>
 
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                     <div class="form-group">
                         <label for="verification_code">Verification code *</label>
                         <input type="text" id="verification_code" name="verification_code"
@@ -265,6 +280,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
                 </div>
 
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                     <div class="form-group">
                         <label for="password">Create password *</label>
                         <input type="password" id="password" name="password"
@@ -297,6 +313,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
                 </div>
 
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                     <div class="form-group">
                         <label for="full_name">Name *</label>
                         <input type="text" id="full_name" name="full_name"

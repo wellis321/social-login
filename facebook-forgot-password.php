@@ -4,24 +4,25 @@
  * Request password reset email
  */
 
-session_start();
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/includes/functions.php';
-
-// Check if required functions exist
-if (!function_exists('isPhoneNumber') || !function_exists('normalizePhone')) {
-    error_log("Missing required functions in facebook-forgot-password.php");
-}
+require_once __DIR__ . '/includes/security.php';
 
 $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $contact_value = sanitizeInput($_POST['contact_value'] ?? '');
-
-    if (empty($contact_value)) {
-        $error = "Email address or phone number is required";
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please refresh the page and try again.";
     } else {
+        $contact_value = sanitizeInput($_POST['contact_value'] ?? '');
+
+        if (empty($contact_value)) {
+            $error = "Email address or phone number is required";
+        } else {
+            // Check rate limit (3 attempts per 15 minutes)
+            if (!checkRateLimit('password_reset', $contact_value, 3, 900)) {
+                $error = "Too many password reset requests. Please wait 15 minutes before trying again.";
+            } else {
         try {
             $conn = getDbConnection();
 
@@ -111,12 +112,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
             }
-        } catch (Exception $e) {
-            error_log("Error in facebook-forgot-password.php: " . $e->getMessage());
-            $error = "An error occurred. Please try again later.";
+            } catch (Exception $e) {
+                error_log("Error in facebook-forgot-password.php: " . $e->getMessage());
+                $error = "An error occurred. Please try again later.";
+            }
         }
     }
 }
+
+$csrf_token = generateCSRFToken();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -165,6 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                     <div class="form-group">
                         <label for="contact_value">Email address or phone number</label>
                         <input type="text" id="contact_value" name="contact_value"

@@ -4,8 +4,7 @@
  * Secure authentication for administrators
  */
 
-session_start();
-require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/security.php';
 
 $error = '';
 
@@ -17,36 +16,50 @@ if (isset($_SESSION['admin_id'])) {
 
 // Handle login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
-
-    if (empty($username) || empty($password)) {
-        $error = "Please enter both username and password";
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please refresh the page and try again.";
     } else {
-        $conn = getDbConnection();
-        $username = $conn->real_escape_string($username);
+        $username = trim($_POST['username']);
+        $password = $_POST['password'];
 
-        $sql = "SELECT id, password_hash FROM admin_users WHERE username = '$username' AND is_active = 1";
-        $result = $conn->query($sql);
+        if (empty($username) || empty($password)) {
+            $error = "Please enter both username and password";
+        } else {
+            // Check rate limit (5 attempts per 15 minutes)
+            if (!checkRateLimit('admin_login', $username, 5, 900)) {
+                $error = "Too many login attempts. Please wait 15 minutes before trying again.";
+            } else {
+                $conn = getDbConnection();
+                $stmt = $conn->prepare("SELECT id, password_hash FROM admin_users WHERE username = ? AND is_active = 1");
+                $stmt->bind_param("s", $username);
+                $stmt->execute();
+                $result = $stmt->get_result();
 
-        if ($result->num_rows === 1) {
-            $admin = $result->fetch_assoc();
-            if (password_verify($password, $admin['password_hash'])) {
-                $_SESSION['admin_id'] = $admin['id'];
-                $_SESSION['admin_username'] = $username;
+                if ($result->num_rows === 1) {
+                    $admin = $result->fetch_assoc();
+                    if (password_verify($password, $admin['password_hash'])) {
+                        $_SESSION['admin_id'] = $admin['id'];
+                        $_SESSION['admin_username'] = $username;
 
-                // Update last login
-                $admin_id = $admin['id'];
-                $conn->query("UPDATE admin_users SET last_login = NOW() WHERE id = $admin_id");
+                        // Update last login
+                        $admin_id = $admin['id'];
+                        $update_stmt = $conn->prepare("UPDATE admin_users SET last_login = NOW() WHERE id = ?");
+                        $update_stmt->bind_param("i", $admin_id);
+                        $update_stmt->execute();
 
-                header('Location: dashboard.php');
-                exit;
+                        header('Location: dashboard.php');
+                        exit;
+                    }
+                }
+
+                $error = "Invalid username or password";
             }
         }
-
-        $error = "Invalid username or password";
     }
 }
+
+$csrf_token = generateCSRFToken();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -72,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
 
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input type="text" id="username" name="username"

@@ -4,9 +4,7 @@
  * Set new password with valid token
  */
 
-session_start();
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/security.php';
 
 $error = '';
 $success = '';
@@ -18,11 +16,12 @@ $user_id = null;
 if (empty($token)) {
     $error = "Invalid or missing reset token";
 } else {
-    // Verify token
+    // Verify token using prepared statement
     $conn = getDbConnection();
-    $token_safe = $conn->real_escape_string($token);
-
-    $result = $conn->query("SELECT id, email FROM users WHERE reset_token = '$token_safe' AND reset_token_expires > NOW() AND platform = 'twitter'");
+    $stmt = $conn->prepare("SELECT id, email FROM users WHERE reset_token = ? AND reset_token_expires > NOW() AND platform = 'twitter'");
+    $stmt->bind_param("s", $token);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result && $result->num_rows > 0) {
         $valid_token = true;
@@ -35,36 +34,44 @@ if (empty($token)) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $valid_token) {
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
-
-    if (empty($password)) {
-        $error = "Password is required";
-    } elseif (strlen($password) < 8) {
-        $error = "Password must be at least 8 characters long";
-    } elseif ($password !== $confirm_password) {
-        $error = "Passwords do not match";
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please refresh the page and try again.";
     } else {
-        $conn = getDbConnection();
-        $token_safe = $conn->real_escape_string($token);
-        $password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $user_id_safe = intval($user_id);
+        $password = $_POST['password'];
+        $confirm_password = $_POST['confirm_password'];
 
-        // Update password and clear reset token using user_id (more reliable than token after update)
-        $update_result = $conn->query("UPDATE users SET password_hash = '$password_hash', reset_token = NULL, reset_token_expires = NULL WHERE id = $user_id_safe AND reset_token = '$token_safe' AND platform = 'twitter'");
-
-        if ($update_result) {
-            // Log activity
-            if (function_exists('logActivity') && $user_id) {
-                @logActivity($user_id, 'twitter', 'password_reset', "Password successfully reset for $user_email");
-            }
-            $success = "Your password has been reset successfully! You can now log in with your new password.";
+        if (empty($password)) {
+            $error = "Password is required";
+        } elseif (strlen($password) < 8) {
+            $error = "Password must be at least 8 characters long";
+        } elseif ($password !== $confirm_password) {
+            $error = "Passwords do not match";
         } else {
-            error_log("Password reset update failed: " . $conn->error);
-            $error = "Failed to update password. Please try again or request a new reset link.";
+            $conn = getDbConnection();
+            $password_hash = password_hash($password, PASSWORD_DEFAULT);
+            $user_id_safe = intval($user_id);
+
+            // Update password and clear reset token using prepared statement
+            $stmt = $conn->prepare("UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ? AND reset_token = ? AND platform = 'twitter'");
+            $stmt->bind_param("sis", $password_hash, $user_id_safe, $token);
+            $update_result = $stmt->execute();
+
+            if ($update_result) {
+                // Log activity
+                if (function_exists('logActivity') && $user_id) {
+                    @logActivity($user_id, 'twitter', 'password_reset', "Password successfully reset");
+                }
+                $success = "Your password has been reset successfully! You can now log in with your new password.";
+            } else {
+                error_log("Password reset update failed: " . $conn->error);
+                $error = "Failed to update password. Please try again or request a new reset link.";
+            }
         }
     }
 }
+
+$csrf_token = generateCSRFToken();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -108,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $valid_token) {
                 </div>
 
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                     <div class="form-group">
                         <label for="password">New password</label>
                         <input type="password" id="password" name="password"

@@ -4,9 +4,7 @@
  * Multi-step registration with email verification and educational guidance
  */
 
-session_start();
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/security.php';
 
 $errors = [];
 $success = false;
@@ -14,142 +12,154 @@ $step = isset($_GET['step']) ? intval($_GET['step']) : 1;
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($step === 1) {
-        // Step 1: Initial signup form
-        $first_name = sanitizeInput($_POST['first_name'] ?? '');
-        $last_name = sanitizeInput($_POST['last_name'] ?? '');
-        $day = sanitizeInput($_POST['day'] ?? '');
-        $month = sanitizeInput($_POST['month'] ?? '');
-        $year = sanitizeInput($_POST['year'] ?? '');
-        $gender = sanitizeInput($_POST['gender'] ?? '');
-        $pronoun = sanitizeInput($_POST['pronoun'] ?? '');
-        $contact_value = sanitizeInput($_POST['contact_value'] ?? '');
-        $password = $_POST['password'] ?? '';
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $errors[] = "Invalid security token. Please refresh the page and try again.";
+    } else {
+        if ($step === 1) {
+            // Step 1: Initial signup form
+            $first_name = sanitizeInput($_POST['first_name'] ?? '');
+            $last_name = sanitizeInput($_POST['last_name'] ?? '');
+            $day = sanitizeInput($_POST['day'] ?? '');
+            $month = sanitizeInput($_POST['month'] ?? '');
+            $year = sanitizeInput($_POST['year'] ?? '');
+            $gender = sanitizeInput($_POST['gender'] ?? '');
+            $pronoun = sanitizeInput($_POST['pronoun'] ?? '');
+            $contact_value = sanitizeInput($_POST['contact_value'] ?? '');
+            $password = $_POST['password'] ?? '';
 
-        // Validation
-        if (empty($first_name)) {
-            $errors[] = "First name is required";
-        }
-
-        if (empty($last_name)) {
-            $errors[] = "Surname is required";
-        }
-
-        if (empty($day) || empty($month) || empty($year)) {
-            $errors[] = "Date of birth is required";
-        } else {
-            // Validate date
-            if (!checkdate($month, $day, $year)) {
-                $errors[] = "Please enter a valid date of birth";
+            // Check rate limit for signup (3 attempts per 15 minutes)
+            if (!checkRateLimit('signup', $contact_value, 3, 900)) {
+                $errors[] = "Too many signup attempts. Please wait 15 minutes before trying again.";
             } else {
-                $dob = sprintf('%04d-%02d-%02d', $year, $month, $day);
-                // Check age requirement (13 years old)
-                $age = date_diff(date_create($dob), date_create('today'))->y;
-                if ($age < 13) {
-                    $errors[] = "You must be at least 13 years old to use Facebook";
+                // Validation
+                if (empty($first_name)) {
+                    $errors[] = "First name is required";
+                }
+
+                if (empty($last_name)) {
+                    $errors[] = "Surname is required";
+                }
+
+                if (empty($day) || empty($month) || empty($year)) {
+                    $errors[] = "Date of birth is required";
+                } else {
+                    // Validate date
+                    if (!checkdate($month, $day, $year)) {
+                        $errors[] = "Please enter a valid date of birth";
+                    } else {
+                        $dob = sprintf('%04d-%02d-%02d', $year, $month, $day);
+                        // Check age requirement (13 years old)
+                        $age = date_diff(date_create($dob), date_create('today'))->y;
+                        if ($age < 13) {
+                            $errors[] = "You must be at least 13 years old to use Facebook";
+                        }
+                    }
+                }
+
+                if (empty($contact_value)) {
+                    $errors[] = "Mobile number or email address is required";
+                } else {
+                    // Detect if it's an email or phone number
+                    $is_email = validateEmail($contact_value);
+                    if ($is_email && userExists($contact_value, 'facebook')) {
+                        $errors[] = "An account with this email already exists. Try logging in instead.";
+                    }
+                }
+
+                if (empty($password)) {
+                    $errors[] = "Password is required";
+                } elseif (strlen($password) < 8) {
+                    $errors[] = "Password must be at least 8 characters long";
+                }
+
+                if (empty($errors)) {
+                    // Store signup data and generate verification code
+                    $_SESSION['signup_data']['first_name'] = $first_name;
+                    $_SESSION['signup_data']['last_name'] = $last_name;
+                    $_SESSION['signup_data']['date_of_birth'] = $dob;
+                    $_SESSION['signup_data']['gender'] = $gender;
+                    $_SESSION['signup_data']['pronoun'] = $pronoun;
+                    $_SESSION['signup_data']['email'] = $contact_value;
+                    $_SESSION['signup_data']['password'] = $password;
+                    // Generate verification code with FB- prefix
+                    $_SESSION['signup_data']['verification_code'] = sprintf('FB-%05d', mt_rand(0, 99999));
+                    header('Location: facebook-signup.php?step=2');
+                    exit;
                 }
             }
-        }
+        } elseif ($step === 2) {
+            // Step 2: Email verification code
+            $entered_code = sanitizeInput($_POST['verification_code'] ?? '');
+            $expected_code = $_SESSION['signup_data']['verification_code'] ?? '';
 
-        if (empty($contact_value)) {
-            $errors[] = "Mobile number or email address is required";
-        } else {
-            // Detect if it's an email or phone number
-            $is_email = validateEmail($contact_value);
-            if ($is_email && userExists($contact_value, 'facebook')) {
-                $errors[] = "An account with this email already exists. Try logging in instead.";
-            }
-        }
-
-        if (empty($password)) {
-            $errors[] = "Password is required";
-        } elseif (strlen($password) < 8) {
-            $errors[] = "Password must be at least 8 characters long";
-        }
-
-        if (empty($errors)) {
-            // Store signup data and generate verification code
-            $_SESSION['signup_data']['first_name'] = $first_name;
-            $_SESSION['signup_data']['last_name'] = $last_name;
-            $_SESSION['signup_data']['date_of_birth'] = $dob;
-            $_SESSION['signup_data']['gender'] = $gender;
-            $_SESSION['signup_data']['pronoun'] = $pronoun;
-            $_SESSION['signup_data']['email'] = $contact_value;
-            $_SESSION['signup_data']['password'] = $password;
-            // Generate verification code with FB- prefix
-            $_SESSION['signup_data']['verification_code'] = sprintf('FB-%05d', mt_rand(0, 99999));
-            header('Location: facebook-signup.php?step=2');
-            exit;
-        }
-    } elseif ($step === 2) {
-        // Step 2: Email verification code
-        $entered_code = sanitizeInput($_POST['verification_code'] ?? '');
-        $expected_code = $_SESSION['signup_data']['verification_code'] ?? '';
-
-        if (empty($entered_code)) {
-            $errors[] = "Verification code is required";
-        } elseif ($entered_code !== $expected_code) {
-            $errors[] = "Incorrect verification code. Please try again.";
-        } else {
-            // Code verified, show confirmation and move to human verification
-            $_SESSION['signup_data']['email_verified'] = true;
-            header('Location: facebook-signup.php?step=3');
-            exit;
-        }
-    } elseif ($step === 3) {
-        // Step 3: Account confirmed - auto proceed to human verification
-        header('Location: facebook-signup.php?step=4');
-        exit;
-    } elseif ($step === 4) {
-        // Step 4: Human verification prompt - auto proceed to CAPTCHA
-        header('Location: facebook-signup.php?step=5');
-        exit;
-    } elseif ($step === 5) {
-        // Step 5: CAPTCHA verification
-        $captcha_code = sanitizeInput($_POST['captcha_code'] ?? '');
-        $expected_captcha = $_SESSION['signup_data']['captcha_code'] ?? '';
-
-        if (empty($captcha_code)) {
-            $errors[] = "Please enter the code from the image";
-        } elseif ($captcha_code !== $expected_captcha) {
-            $errors[] = "Incorrect code. Please try again.";
-        } else {
-            // CAPTCHA verified, proceed to video selfie (optional)
-            $_SESSION['signup_data']['captcha_verified'] = true;
-            header('Location: facebook-signup.php?step=6');
-            exit;
-        }
-    } elseif ($step === 6) {
-        // Step 6: Video selfie - can skip for training
-        $skip_video = isset($_POST['skip_video']) && $_POST['skip_video'] === 'yes';
-
-        if ($skip_video || isset($_POST['video_uploaded'])) {
-            // Create the account
-            $full_name = trim($_SESSION['signup_data']['first_name'] . ' ' . $_SESSION['signup_data']['last_name']);
-            $userData = [
-                'email' => $_SESSION['signup_data']['email'],
-                'password' => $_SESSION['signup_data']['password'],
-                'full_name' => $full_name,
-                'date_of_birth' => $_SESSION['signup_data']['date_of_birth'],
-                'gender' => $_SESSION['signup_data']['gender']
-            ];
-
-            if (createUser('facebook', $userData)) {
-                $user_id = authenticateUser($_SESSION['signup_data']['email'], $_SESSION['signup_data']['password'], 'facebook');
-                logActivity($user_id, 'facebook', 'register', 'New account created');
-
-                $_SESSION['user_id'] = $user_id;
-                $_SESSION['platform'] = 'facebook';
-                unset($_SESSION['signup_data']);
-
-                header('Location: facebook-dashboard.php');
-                exit;
+            if (empty($entered_code)) {
+                $errors[] = "Verification code is required";
+            } elseif ($entered_code !== $expected_code) {
+                $errors[] = "Incorrect verification code. Please try again.";
             } else {
-                $errors[] = "Failed to create account. Please try again.";
+                // Code verified, show confirmation and move to human verification
+                $_SESSION['signup_data']['email_verified'] = true;
+                header('Location: facebook-signup.php?step=3');
+                exit;
+            }
+        } elseif ($step === 3) {
+            // Step 3: Account confirmed - auto proceed to human verification
+            header('Location: facebook-signup.php?step=4');
+            exit;
+        } elseif ($step === 4) {
+            // Step 4: Human verification prompt - auto proceed to CAPTCHA
+            header('Location: facebook-signup.php?step=5');
+            exit;
+        } elseif ($step === 5) {
+            // Step 5: CAPTCHA verification
+            $captcha_code = sanitizeInput($_POST['captcha_code'] ?? '');
+            $expected_captcha = $_SESSION['signup_data']['captcha_code'] ?? '';
+
+            if (empty($captcha_code)) {
+                $errors[] = "Please enter the code from the image";
+            } elseif ($captcha_code !== $expected_captcha) {
+                $errors[] = "Incorrect code. Please try again.";
+            } else {
+                // CAPTCHA verified, proceed to video selfie (optional)
+                $_SESSION['signup_data']['captcha_verified'] = true;
+                header('Location: facebook-signup.php?step=6');
+                exit;
+            }
+        } elseif ($step === 6) {
+            // Step 6: Video selfie - can skip for training
+            $skip_video = isset($_POST['skip_video']) && $_POST['skip_video'] === 'yes';
+
+            if ($skip_video || isset($_POST['video_uploaded'])) {
+                // Create the account
+                $full_name = trim($_SESSION['signup_data']['first_name'] . ' ' . $_SESSION['signup_data']['last_name']);
+                $userData = [
+                    'email' => $_SESSION['signup_data']['email'],
+                    'password' => $_SESSION['signup_data']['password'],
+                    'full_name' => $full_name,
+                    'date_of_birth' => $_SESSION['signup_data']['date_of_birth'],
+                    'gender' => $_SESSION['signup_data']['gender']
+                ];
+
+                if (createUser('facebook', $userData)) {
+                    $user_id = authenticateUser($_SESSION['signup_data']['email'], $_SESSION['signup_data']['password'], 'facebook');
+                    logActivity($user_id, 'facebook', 'register', 'New account created');
+
+                    $_SESSION['user_id'] = $user_id;
+                    $_SESSION['platform'] = 'facebook';
+                    unset($_SESSION['signup_data']);
+
+                    header('Location: facebook-dashboard.php');
+                    exit;
+                } else {
+                    $errors[] = "Failed to create account. Please try again.";
+                }
             }
         }
     }
 }
+
+$csrf_token = generateCSRFToken();
 
 // Generate CAPTCHA code if needed
 if ($step === 5 && !isset($_SESSION['signup_data']['captcha_code'])) {
@@ -198,6 +208,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                     <?php endif; ?>
 
                     <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                     <div class="form-row">
                         <div class="form-group">
                             <input type="text" id="first_name" name="first_name"
@@ -336,6 +347,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                     <?php endif; ?>
 
                     <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                         <div class="form-group">
                             <input type="text" name="verification_code" id="verification_code"
                                    placeholder="FB-" value="FB-" maxlength="9" required autofocus
@@ -440,6 +452,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                     <?php endif; ?>
 
                     <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                         <div style="background: #f0f2f5; border: 1px solid #dddfe2; border-radius: 8px; padding: 24px; margin: 20px 0; text-align: center;">
                             <div style="font-size: 48px; font-weight: 700; color: #1c1e21; letter-spacing: 8px; margin: 20px 0; position: relative;">
                                 <span style="text-decoration: line-through; opacity: 0.3; position: absolute; top: 0; left: 0; width: 100%;">━━━━━━</span>
@@ -471,6 +484,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                     <p>To make sure that you're a real person, we need you to record a video selfie. We'll ask you to move your head during the recording to help us capture your face at different angles.</p>
 
                     <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                         <div style="background: #f0f2f5; border: 1px solid #dddfe2; border-radius: 8px; padding: 24px; margin: 20px 0; text-align: center;">
                             <div style="font-size: 64px; margin-bottom: 16px;">📹</div>
                             <p style="color: #65676b; font-size: 14px; margin: 16px 0;">

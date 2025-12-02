@@ -4,23 +4,25 @@
  * Request password reset email
  */
 
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-session_start();
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/security.php';
 
 $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $contact_value = sanitizeInput($_POST['contact_value'] ?? '');
-
-    if (empty($contact_value)) {
-        $error = "Email address or phone number is required";
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid security token. Please refresh the page and try again.";
     } else {
+        $contact_value = sanitizeInput($_POST['contact_value'] ?? '');
+
+        if (empty($contact_value)) {
+            $error = "Email address or phone number is required";
+        } else {
+            // Check rate limit (3 attempts per 15 minutes)
+            if (!checkRateLimit('password_reset', $contact_value, 3, 900)) {
+                $error = "Too many password reset requests. Please wait 15 minutes before trying again.";
+            } else {
         $conn = getDbConnection();
         $input = trim($contact_value);
 
@@ -96,12 +98,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     @logActivity($user_id, 'twitter', 'password_reset_request', "Reset token generated for $user_email");
                 }
             }
-        } else {
-            // For security, show same message even if account doesn't exist
-            $success = "If an account exists with this email/phone, you will receive reset instructions.";
+            } else {
+                // For security, show same message even if account doesn't exist
+                $success = "If an account exists with this email/phone, you will receive reset instructions.";
+            }
         }
     }
 }
+
+$csrf_token = generateCSRFToken();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -150,6 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                     <div class="form-group">
                         <label for="contact_value">Email address or phone number</label>
                         <input type="text" id="contact_value" name="contact_value"

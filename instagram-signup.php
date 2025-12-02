@@ -4,9 +4,7 @@
  * Multi-step registration matching real Instagram flow
  */
 
-session_start();
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/security.php';
 
 $errors = [];
 $success = false;
@@ -14,126 +12,140 @@ $step = isset($_GET['step']) ? intval($_GET['step']) : 1;
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($step === 1) {
-        // Step 1: Mobile/Email, Password, Full Name, Username (all on one page)
-        $contact_value = sanitizeInput($_POST['contact_value'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $full_name = sanitizeInput($_POST['full_name'] ?? '');
-        $username = sanitizeInput($_POST['username'] ?? '');
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $errors[] = "Invalid security token. Please refresh the page and try again.";
+    } else {
+        if ($step === 1) {
+            // Step 1: Mobile/Email, Password, Full Name, Username (all on one page)
+            $contact_value = sanitizeInput($_POST['contact_value'] ?? '');
+            $password = $_POST['password'] ?? '';
+            $full_name = sanitizeInput($_POST['full_name'] ?? '');
+            $username = sanitizeInput($_POST['username'] ?? '');
 
-        if (empty($contact_value)) {
-            $errors[] = "Mobile number or email address is required";
-        } else {
-            $is_email = validateEmail($contact_value);
-            if ($is_email && userExists($contact_value, 'instagram')) {
-                $errors[] = "An account with this email already exists. Try logging in instead.";
-            }
-        }
-
-        if (empty($password)) {
-            $errors[] = "Password is required";
-        } elseif (strlen($password) < 6) {
-            $errors[] = "Password must be at least 6 characters long";
-        }
-
-        if (empty($full_name)) {
-            $errors[] = "Full name is required";
-        }
-
-        if (empty($username)) {
-            $errors[] = "Username is required";
-        } elseif (!preg_match('/^[a-zA-Z0-9._]{1,30}$/', $username)) {
-            $errors[] = "Username can only contain letters, numbers, periods, and underscores (max 30 characters)";
-        } else {
-            // Check if username is already taken
-            $conn = getDbConnection();
-            $username_check = $conn->real_escape_string($username);
-            $result = $conn->query("SELECT id FROM users WHERE username = '$username_check' AND platform = 'instagram'");
-            if ($result->num_rows > 0) {
-                $errors[] = "This username is already taken. Please choose a different one.";
-            }
-        }
-
-        if (empty($errors)) {
-            $_SESSION['signup_data']['email'] = $contact_value;
-            $_SESSION['signup_data']['password'] = $password;
-            $_SESSION['signup_data']['full_name'] = $full_name;
-            $_SESSION['signup_data']['username'] = $username;
-            header('Location: instagram-signup.php?step=2');
-            exit;
-        }
-    } elseif ($step === 2) {
-        // Step 2: Date of birth
-        $month = sanitizeInput($_POST['month'] ?? '');
-        $day = sanitizeInput($_POST['day'] ?? '');
-        $year = sanitizeInput($_POST['year'] ?? '');
-
-        if (empty($month) || empty($day) || empty($year)) {
-            $errors[] = "Please select your complete date of birth";
-        } else {
-            // Validate date
-            $dob = sprintf('%04d-%02d-%02d', $year, $month, $day);
-            if (!checkdate($month, $day, $year)) {
-                $errors[] = "Please enter a valid date of birth";
+            // Check rate limit for signup (3 attempts per 15 minutes)
+            if (!checkRateLimit('signup', $contact_value, 3, 900)) {
+                $errors[] = "Too many signup attempts. Please wait 15 minutes before trying again.";
             } else {
-                // Check age requirement (13 years old)
-                $age = date_diff(date_create($dob), date_create('today'))->y;
-                if ($age < 13) {
-                    $errors[] = "You must be at least 13 years old to use Instagram";
+                if (empty($contact_value)) {
+                    $errors[] = "Mobile number or email address is required";
                 } else {
-                    $_SESSION['signup_data']['date_of_birth'] = $dob;
-                    header('Location: instagram-signup.php?step=3');
+                    $is_email = validateEmail($contact_value);
+                    if ($is_email && userExists($contact_value, 'instagram')) {
+                        $errors[] = "An account with this email already exists. Try logging in instead.";
+                    }
+                }
+
+                if (empty($password)) {
+                    $errors[] = "Password is required";
+                } elseif (strlen($password) < 6) {
+                    $errors[] = "Password must be at least 6 characters long";
+                }
+
+                if (empty($full_name)) {
+                    $errors[] = "Full name is required";
+                }
+
+                if (empty($username)) {
+                    $errors[] = "Username is required";
+                } elseif (!preg_match('/^[a-zA-Z0-9._]{1,30}$/', $username)) {
+                    $errors[] = "Username can only contain letters, numbers, periods, and underscores (max 30 characters)";
+                } else {
+                    // Check if username is already taken using prepared statement
+                    $conn = getDbConnection();
+                    $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? AND platform = 'instagram'");
+                    $stmt->bind_param("s", $username);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    if ($result->num_rows > 0) {
+                        $errors[] = "This username is already taken. Please choose a different one.";
+                    }
+                }
+
+                if (empty($errors)) {
+                    $_SESSION['signup_data']['email'] = $contact_value;
+                    $_SESSION['signup_data']['password'] = $password;
+                    $_SESSION['signup_data']['full_name'] = $full_name;
+                    $_SESSION['signup_data']['username'] = $username;
+                    header('Location: instagram-signup.php?step=2');
                     exit;
                 }
             }
-        }
-    } elseif ($step === 3) {
-        // Step 3: CAPTCHA verification (simulated)
-        $captcha_verified = isset($_POST['captcha_verified']) && $_POST['captcha_verified'] === 'yes';
+        } elseif ($step === 2) {
+            // Step 2: Date of birth
+            $month = sanitizeInput($_POST['month'] ?? '');
+            $day = sanitizeInput($_POST['day'] ?? '');
+            $year = sanitizeInput($_POST['year'] ?? '');
 
-        if (!$captcha_verified) {
-            $errors[] = "Please complete the security check";
-        } else {
-            // Generate verification code
-            $_SESSION['signup_data']['verification_code'] = sprintf('%06d', mt_rand(0, 999999));
-            header('Location: instagram-signup.php?step=4');
-            exit;
-        }
-    } elseif ($step === 4) {
-        // Step 4: Verification code
-        $entered_code = sanitizeInput($_POST['verification_code'] ?? '');
-        $expected_code = $_SESSION['signup_data']['verification_code'] ?? '';
-
-        if (empty($entered_code)) {
-            $errors[] = "Verification code is required";
-        } elseif ($entered_code !== $expected_code) {
-            $errors[] = "Incorrect verification code. Please try again.";
-        } else {
-            // Create the account
-            $userData = [
-                'email' => $_SESSION['signup_data']['email'],
-                'password' => $_SESSION['signup_data']['password'],
-                'full_name' => $_SESSION['signup_data']['full_name'],
-                'username' => $_SESSION['signup_data']['username'],
-                'date_of_birth' => $_SESSION['signup_data']['date_of_birth']
-            ];
-
-            if (createUser('instagram', $userData)) {
-                $user_id = authenticateUser($_SESSION['signup_data']['email'], $_SESSION['signup_data']['password'], 'instagram');
-                logActivity($user_id, 'instagram', 'register', 'New account created');
-
-                $_SESSION['user_id'] = $user_id;
-                $_SESSION['platform'] = 'instagram';
-                unset($_SESSION['signup_data']);
-
-                header('Location: instagram-dashboard.php');
-                exit;
+            if (empty($month) || empty($day) || empty($year)) {
+                $errors[] = "Please select your complete date of birth";
             } else {
-                $errors[] = "Failed to create account. Please try again.";
+                // Validate date
+                $dob = sprintf('%04d-%02d-%02d', $year, $month, $day);
+                if (!checkdate($month, $day, $year)) {
+                    $errors[] = "Please enter a valid date of birth";
+                } else {
+                    // Check age requirement (13 years old)
+                    $age = date_diff(date_create($dob), date_create('today'))->y;
+                    if ($age < 13) {
+                        $errors[] = "You must be at least 13 years old to use Instagram";
+                    } else {
+                        $_SESSION['signup_data']['date_of_birth'] = $dob;
+                        header('Location: instagram-signup.php?step=3');
+                        exit;
+                    }
+                }
+            }
+        } elseif ($step === 3) {
+            // Step 3: CAPTCHA verification (simulated)
+            $captcha_verified = isset($_POST['captcha_verified']) && $_POST['captcha_verified'] === 'yes';
+
+            if (!$captcha_verified) {
+                $errors[] = "Please complete the security check";
+            } else {
+                // Generate verification code
+                $_SESSION['signup_data']['verification_code'] = sprintf('%06d', mt_rand(0, 999999));
+                header('Location: instagram-signup.php?step=4');
+                exit;
+            }
+        } elseif ($step === 4) {
+            // Step 4: Verification code
+            $entered_code = sanitizeInput($_POST['verification_code'] ?? '');
+            $expected_code = $_SESSION['signup_data']['verification_code'] ?? '';
+
+            if (empty($entered_code)) {
+                $errors[] = "Verification code is required";
+            } elseif ($entered_code !== $expected_code) {
+                $errors[] = "Incorrect verification code. Please try again.";
+            } else {
+                // Create the account
+                $userData = [
+                    'email' => $_SESSION['signup_data']['email'],
+                    'password' => $_SESSION['signup_data']['password'],
+                    'full_name' => $_SESSION['signup_data']['full_name'],
+                    'username' => $_SESSION['signup_data']['username'],
+                    'date_of_birth' => $_SESSION['signup_data']['date_of_birth']
+                ];
+
+                if (createUser('instagram', $userData)) {
+                    $user_id = authenticateUser($_SESSION['signup_data']['email'], $_SESSION['signup_data']['password'], 'instagram');
+                    logActivity($user_id, 'instagram', 'register', 'New account created');
+
+                    $_SESSION['user_id'] = $user_id;
+                    $_SESSION['platform'] = 'instagram';
+                    unset($_SESSION['signup_data']);
+
+                    header('Location: instagram-dashboard.php');
+                    exit;
+                } else {
+                    $errors[] = "Failed to create account. Please try again.";
+                }
             }
         }
     }
 }
+
+$csrf_token = generateCSRFToken();
 
 // Get stored data
 $contact_value = $_SESSION['signup_data']['email'] ?? '';
@@ -167,6 +179,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
                 <?php if ($step === 1): ?>
                     <!-- Step 1: Mobile/Email, Password, Full Name, Username -->
                     <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                         <div class="form-group">
                             <input type="text" name="contact_value"
                                    value="<?= htmlspecialchars($contact_value) ?>"
@@ -212,6 +225,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
                     </div>
 
                     <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                         <div class="form-row" style="gap: 8px;">
                             <div class="form-group" style="flex: 1;">
                                 <select name="month" id="month" required style="width: 100%; padding: 12px; background-color: #262626; border: 1px solid #363636; border-radius: 4px; color: #fff; font-size: 14px;">
@@ -264,6 +278,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
                     </div>
 
                     <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                         <div style="background: #262626; border: 1px solid #363636; border-radius: 8px; padding: 24px; margin-bottom: 20px;">
                             <div style="background: #1877f2; color: #fff; padding: 16px; border-radius: 4px; margin-bottom: 16px; text-align: center; font-weight: 600;">
                                 Select all images with cars
@@ -317,6 +332,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
                     </div>
 
                     <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                         <div class="form-group">
                             <input type="text" name="verification_code" id="verification_code"
                                    placeholder="######" maxlength="6" pattern="[0-9]{6}"
