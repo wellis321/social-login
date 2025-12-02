@@ -25,20 +25,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!checkRateLimit('signup', $contact_value, 3, 900)) {
                 $errors[] = "Too many signup attempts. Please wait 15 minutes before trying again.";
             } else {
-
-        if (empty($contact_value)) {
-            $errors[] = $contact_type === 'email' ? "Email is required" : "Phone number is required";
-        } elseif ($contact_type === 'email' && !validateEmail($contact_value)) {
-            $errors[] = "Please enter a valid email address";
-        } elseif ($contact_type === 'email' && userExists($contact_value, 'twitter')) {
-            $errors[] = "An account with this email already exists. Try logging in instead.";
-        } else {
-                $_SESSION['signup_data']['contact_type'] = $contact_type;
-                $_SESSION['signup_data']['email'] = $contact_value;
-                // Generate a fake verification code for training
-                $_SESSION['signup_data']['verification_code'] = sprintf('%06d', mt_rand(0, 999999));
-                header('Location: twitter-signup.php?step=2');
-                exit;
+                if (empty($contact_value)) {
+                    $errors[] = $contact_type === 'email' ? "Email is required" : "Phone number is required";
+                } elseif ($contact_type === 'email' && !validateEmail($contact_value)) {
+                    $errors[] = "Please enter a valid email address";
+                } elseif ($contact_type === 'email' && userExists($contact_value, 'twitter')) {
+                    $errors[] = "An account with this email already exists. Try logging in instead.";
+                } else {
+                    $_SESSION['signup_data']['contact_type'] = $contact_type;
+                    $_SESSION['signup_data']['email'] = $contact_value;
+                    // Generate a fake verification code for training
+                    $_SESSION['signup_data']['verification_code'] = sprintf('%06d', mt_rand(0, 999999));
+                    header('Location: twitter-signup.php?step=2');
+                    exit;
+                }
             }
         } elseif ($step === 2) {
             // Step 2: Verification code
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: twitter-signup.php?step=3');
                 exit;
             }
-            } elseif ($step === 3) {
+        } elseif ($step === 3) {
             // Step 3: Password creation
             $password = $_POST['password'];
             $confirm_password = $_POST['confirm_password'];
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: twitter-signup.php?step=4');
                 exit;
             }
-            } elseif ($step === 4) {
+        } elseif ($step === 4) {
             // Step 4: Profile information
             $full_name = sanitizeInput($_POST['full_name']);
             $username = sanitizeInput($_POST['username']);
@@ -109,16 +109,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ];
 
                 if (createUser('twitter', $userData)) {
-                    $user = getUserById($userData['email']);
-                    $user_id = $user ? $user['id'] : null;
-                    logActivity($user_id, 'twitter', 'register', 'New account created');
+                    // Authenticate to get user ID
+                    $user_id = authenticateUser($userData['email'], $userData['password'], 'twitter');
+                    if ($user_id) {
+                        logActivity($user_id, 'twitter', 'register', 'New account created');
 
-                    $_SESSION['user_id'] = $user_id;
-                    $_SESSION['platform'] = 'twitter';
-                    unset($_SESSION['signup_data']);
+                        $_SESSION['user_id'] = $user_id;
+                        $_SESSION['platform'] = 'twitter';
+                        unset($_SESSION['signup_data']);
 
-                    header('Location: twitter-dashboard.php');
-                    exit;
+                        header('Location: twitter-dashboard.php');
+                        exit;
+                    } else {
+                        $errors[] = "Account created but login failed. Please try logging in.";
+                    }
                 } else {
                     $errors[] = "Failed to create account. Please try again.";
                 }

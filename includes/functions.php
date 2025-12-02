@@ -8,18 +8,24 @@
  */
 function initSecureSession() {
     if (session_status() === PHP_SESSION_NONE) {
-        // Configure secure session settings
-        ini_set('session.cookie_httponly', 1);
-        ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 1 : 0);
-        ini_set('session.use_strict_mode', 1);
-        ini_set('session.cookie_samesite', 'Strict');
-        session_start();
+        // Configure secure session settings (only if session hasn't started)
+        @ini_set('session.cookie_httponly', 1);
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+            @ini_set('session.cookie_secure', 1);
+        }
+        @ini_set('session.use_strict_mode', 1);
+        // session.cookie_samesite may not be available in older PHP versions
+        if (version_compare(PHP_VERSION, '7.3.0', '>=')) {
+            @ini_set('session.cookie_samesite', 'Strict');
+        }
+
+        @session_start();
 
         // Regenerate session ID periodically to prevent fixation
         if (!isset($_SESSION['created'])) {
             $_SESSION['created'] = time();
         } else if (time() - $_SESSION['created'] > 1800) {
-            session_regenerate_id(true);
+            @session_regenerate_id(true);
             $_SESSION['created'] = time();
         }
     }

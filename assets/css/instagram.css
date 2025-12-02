@@ -404,17 +404,58 @@ body.instagram-signup-page {
 .login-card .form-group input[type="email"],
 .login-card .form-group input[type="password"],
 .login-card .form-group input[type="tel"] {
-    background-color: #262626;
-    border-color: #363636;
-    color: #fff;
+    background-color: #262626 !important;
+    border-color: #363636 !important;
+    border-width: 1px !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff !important;
+}
+
+.signup-card .form-group input[type="text"]::placeholder,
+.signup-card .form-group input[type="email"]::placeholder,
+.signup-card .form-group input[type="password"]::placeholder,
+.signup-card .form-group input[type="tel"]::placeholder,
+.login-card .form-group input[type="text"]::placeholder,
+.login-card .form-group input[type="email"]::placeholder,
+.login-card .form-group input[type="password"]::placeholder,
+.login-card .form-group input[type="tel"]::placeholder {
+    color: #8e8e8e !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #8e8e8e !important;
 }
 
 .signup-card .form-group input:focus,
 .login-card .form-group input:focus {
-    outline: none;
-    border-color: #8e8e8e;
-    background-color: #262626;
-    color: #fff;
+    outline: none !important;
+    border-color: #8e8e8e !important;
+    background-color: #262626 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff !important;
+}
+
+.signup-card .form-group input:focus::placeholder,
+.login-card .form-group input:focus::placeholder {
+    color: #8e8e8e !important;
+    -webkit-text-fill-color: #8e8e8e !important;
+}
+
+/* Override any autofill styles that might make text invisible */
+.signup-card .form-group input:-webkit-autofill,
+.login-card .form-group input:-webkit-autofill {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #262626 inset !important;
+    box-shadow: 0 0 0px 1000px #262626 inset !important;
+    color: #ffffff !important;
+}
+
+.signup-card .form-group input:-webkit-autofill:focus,
+.login-card .form-group input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #262626 inset !important;
+    box-shadow: 0 0 0px 1000px #262626 inset !important;
+    color: #ffffff !important;
 }
 
 .form-group label {
