@@ -8,19 +8,11 @@ session_start();
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
 
-// Check if required functions exist
-if (!function_exists('isPhoneNumber') || !function_exists('normalizePhone')) {
-    error_log("Missing required functions in twitter-forgot-password.php");
-}
-if (!function_exists('sanitizeInput')) {
-    error_log("Missing sanitizeInput function in twitter-forgot-password.php");
-}
-
 $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $contact_value = function_exists('sanitizeInput') ? sanitizeInput($_POST['contact_value'] ?? '') : trim($_POST['contact_value'] ?? '');
+    $contact_value = sanitizeInput($_POST['contact_value'] ?? '');
 
     if (empty($contact_value)) {
         $error = "Email address or phone number is required";
@@ -29,18 +21,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Normalize the input - if it's a phone number, normalize it (same as authenticateUser)
         $input = trim($contact_value);
-        if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
-            if (isPhoneNumber($input)) {
-                $input = normalizePhone($input);
-            }
+        if (isPhoneNumber($input)) {
+            $input = normalizePhone($input);
         }
         $input_safe = $conn->real_escape_string($input);
 
         // Try exact match first
         $result = $conn->query("SELECT id, email FROM users WHERE email = '$input_safe' AND platform = 'twitter'");
 
-        // If exact match failed and input looks like a phone, try normalized match (same as authenticateUser)
-        if ($result && $result->num_rows === 0 && function_exists('isPhoneNumber') && isPhoneNumber($contact_value)) {
+        // Check for query errors
+        if (!$result) {
+            error_log("Database query error in twitter-forgot-password.php: " . $conn->error);
+            $error = "A database error occurred. Please try again later.";
+        } elseif ($result->num_rows === 0 && isPhoneNumber($contact_value)) {
+            // If exact match failed and input looks like a phone, try normalized match (same as authenticateUser)
             // Get all users for this platform and check normalized phone numbers
             $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'twitter'");
             $found_user = null;
@@ -48,13 +42,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($all_users) {
                 while ($user = $all_users->fetch_assoc()) {
                     $stored_email = $user['email'];
-                    if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
-                        if (isPhoneNumber($stored_email)) {
-                            $normalized_stored = normalizePhone($stored_email);
-                            if ($normalized_stored === $input) {
-                                $found_user = $user;
-                                break;
-                            }
+                    if (isPhoneNumber($stored_email)) {
+                        $normalized_stored = normalizePhone($stored_email);
+                        if ($normalized_stored === $input) {
+                            $found_user = $user;
+                            break;
                         }
                     }
                 }
@@ -62,10 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($found_user) {
                 $result = $conn->query("SELECT id, email FROM users WHERE id = " . intval($found_user['id']));
+                if (!$result) {
+                    error_log("Database query error in twitter-forgot-password.php: " . $conn->error);
+                    $error = "A database error occurred. Please try again later.";
+                }
             }
         }
 
-        if ($result && $result->num_rows > 0) {
+        if (!$error && $result && $result->num_rows > 0) {
             $user_data = $result->fetch_assoc();
             $user_id = $user_data['id'];
             $user_email = $user_data['email'];
