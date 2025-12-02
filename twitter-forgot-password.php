@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $conn = getDbConnection();
 
-        // Normalize the input - if it's a phone number, normalize it (same as authenticateUser)
+        // Normalize the input - if it's a phone number, normalize it
         $input = trim($contact_value);
         if (isPhoneNumber($input)) {
             $input = normalizePhone($input);
@@ -29,12 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Try exact match first
         $result = $conn->query("SELECT id, email FROM users WHERE email = '$input_safe' AND platform = 'twitter'");
 
-        // Check for query errors
-        if (!$result) {
-            error_log("Database query error in twitter-forgot-password.php: " . $conn->error);
-            $error = "A database error occurred. Please try again later.";
-        } elseif ($result->num_rows === 0 && isPhoneNumber($contact_value)) {
-            // If exact match failed and input looks like a phone, try normalized match (same as authenticateUser)
+        // If exact match failed and input looks like a phone, try normalized match
+        if ($result && $result->num_rows === 0 && isPhoneNumber($contact_value)) {
             // Get all users for this platform and check normalized phone numbers
             $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'twitter'");
             $found_user = null;
@@ -54,14 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($found_user) {
                 $result = $conn->query("SELECT id, email FROM users WHERE id = " . intval($found_user['id']));
-                if (!$result) {
-                    error_log("Database query error in twitter-forgot-password.php: " . $conn->error);
-                    $error = "A database error occurred. Please try again later.";
-                }
             }
         }
 
-        if (!$error && $result && $result->num_rows > 0) {
+        if ($result && $result->num_rows > 0) {
             $user_data = $result->fetch_assoc();
             $user_id = $user_data['id'];
             $user_email = $user_data['email'];
@@ -86,9 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (function_exists('logActivity')) {
                     @logActivity($user_id, 'twitter', 'password_reset_request', "Reset token generated for $user_email");
                 }
-            } else {
-                error_log("Database update error in twitter-forgot-password.php: " . $conn->error);
-                $error = "A database error occurred. Please try again later.";
             }
         } else {
             // For security, show same message even if account doesn't exist
@@ -114,16 +103,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php if ($error): ?>
                 <div class="error-box">
-                    <p><span class="icon-warning">⚠</span> <?= htmlspecialchars($error) ?></p>
+                    <p>⚠ <?= htmlspecialchars($error) ?></p>
                 </div>
             <?php endif; ?>
 
             <?php if ($success): ?>
                 <div class="success-box">
-                    <p><span class="icon-check">✓</span> <?= htmlspecialchars($success) ?></p>
+                    <p>✓ <?= htmlspecialchars($success) ?></p>
                     <?php if (isset($_SESSION['reset_link'])): ?>
                         <div class="info-box" style="margin-top: 16px;">
-                            <h3><span class="icon-email">✉</span> Training Mode - Password Reset Link</h3>
+                            <h3>✉ Training Mode - Password Reset Link</h3>
                             <p>In a real application, this link would be emailed to you. Click below to reset your password:</p>
                             <a href="<?= htmlspecialchars($_SESSION['reset_link']) ?>" class="btn btn-primary btn-block" style="margin-top: 12px;">Reset My Password</a>
                             <p style="margin-top: 12px; font-size: 12px; color: #71767b;">This link expires in 1 hour.</p>
@@ -133,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php else: ?>
                 <div class="help-box">
-                    <h3><span class="icon-lock">🔒</span> How Password Reset Works</h3>
+                    <h3>🔒 How Password Reset Works</h3>
                     <ul>
                         <li>Enter your email address or phone number</li>
                         <li>We'll send you a secure reset link</li>
