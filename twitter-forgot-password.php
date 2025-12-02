@@ -18,54 +18,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Email address or phone number is required";
     } else {
         $conn = getDbConnection();
-
-        // Normalize the input - if it's a phone number, normalize it
         $input = trim($contact_value);
-        $is_phone = false;
-        try {
-            if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
-                if (isPhoneNumber($input)) {
-                    $input = normalizePhone($input);
-                    $is_phone = true;
-                }
+
+        // Try to normalize if it's a phone number (but don't fail if functions don't exist)
+        if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
+            if (isPhoneNumber($input)) {
+                $input = normalizePhone($input);
             }
-        } catch (Exception $e) {
-            // If phone functions fail, just use the input as-is
-            error_log("Phone number function error: " . $e->getMessage());
         }
+
         $input_safe = $conn->real_escape_string($input);
 
         // Try exact match first
         $result = $conn->query("SELECT id, email FROM users WHERE email = '$input_safe' AND platform = 'twitter'");
 
-        // If exact match failed and input looks like a phone, try normalized match
-        if ($result && $result->num_rows === 0 && $is_phone && function_exists('isPhoneNumber')) {
-            // Get all users for this platform and check normalized phone numbers
-            $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'twitter'");
-            $found_user = null;
+        // If no match and it might be a phone, try to find by normalized phone
+        if ($result && $result->num_rows === 0) {
+            // Try phone number matching if functions exist
+            if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
+                if (isPhoneNumber($contact_value)) {
+                    $normalized_input = normalizePhone($contact_value);
+                    $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'twitter'");
 
-            if ($all_users) {
-                while ($user = $all_users->fetch_assoc()) {
-                    $stored_email = $user['email'];
-                    try {
-                        if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
-                            if (isPhoneNumber($stored_email)) {
-                                $normalized_stored = normalizePhone($stored_email);
-                                if ($normalized_stored === $input) {
-                                    $found_user = $user;
+                    if ($all_users) {
+                        while ($user = $all_users->fetch_assoc()) {
+                            if (isPhoneNumber($user['email'])) {
+                                $normalized_stored = normalizePhone($user['email']);
+                                if ($normalized_stored === $normalized_input) {
+                                    $result = $conn->query("SELECT id, email FROM users WHERE id = " . intval($user['id']));
                                     break;
                                 }
                             }
                         }
-                    } catch (Exception $e) {
-                        // Skip this user if phone functions fail
-                        continue;
                     }
                 }
-            }
-
-            if ($found_user) {
-                $result = $conn->query("SELECT id, email FROM users WHERE id = " . intval($found_user['id']));
             }
         }
 
@@ -82,15 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $update_result = $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE id = $user_id");
 
             if ($update_result) {
-                // In a real app, you would email this link
-                // For training purposes, we'll display it
                 $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/twitter-reset-password.php?token=$token";
 
                 $success = "Password reset instructions have been sent! In a real application, this would be emailed to you.";
                 $_SESSION['reset_link'] = $reset_link;
                 $_SESSION['reset_email'] = $user_email;
 
-                // Log activity (if function exists)
                 if (function_exists('logActivity')) {
                     @logActivity($user_id, 'twitter', 'password_reset_request', "Reset token generated for $user_email");
                 }
