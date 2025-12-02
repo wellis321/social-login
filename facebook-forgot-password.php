@@ -8,6 +8,11 @@ session_start();
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
 
+// Check if required functions exist
+if (!function_exists('isPhoneNumber') || !function_exists('normalizePhone')) {
+    error_log("Missing required functions in facebook-forgot-password.php");
+}
+
 $error = '';
 $success = '';
 
@@ -17,85 +22,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($contact_value)) {
         $error = "Email address or phone number is required";
     } else {
-        $conn = getDbConnection();
+        try {
+            $conn = getDbConnection();
 
-        // Normalize the input - if it's a phone number, normalize it (same as authenticateUser)
-        $input = trim($contact_value);
-        if (isPhoneNumber($input)) {
-            $input = normalizePhone($input);
-        }
-        $input_safe = $conn->real_escape_string($input);
+            if (!$conn) {
+                throw new Exception("Database connection failed");
+            }
 
-        // Try exact match first
-        $result = $conn->query("SELECT id, email FROM users WHERE email = '$input_safe' AND platform = 'facebook'");
+            // Normalize the input - if it's a phone number, normalize it (same as authenticateUser)
+            $input = trim($contact_value);
+            if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
+                if (isPhoneNumber($input)) {
+                    $input = normalizePhone($input);
+                }
+            }
+            $input_safe = $conn->real_escape_string($input);
 
-        // Check for query errors
-        if (!$result) {
-            error_log("Database query error in facebook-forgot-password.php: " . $conn->error);
-            $error = "A database error occurred. Please try again later.";
-        } else {
-            // If exact match failed and input looks like a phone, try normalized match (same as authenticateUser)
-            if ($result->num_rows === 0 && isPhoneNumber($contact_value)) {
-                // Get all users for this platform and check normalized phone numbers
-                $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'facebook'");
-                $found_user = null;
+            // Try exact match first
+            $result = $conn->query("SELECT id, email FROM users WHERE email = '$input_safe' AND platform = 'facebook'");
 
-                if ($all_users) {
-                    while ($user = $all_users->fetch_assoc()) {
-                        $stored_email = $user['email'];
-                        if (isPhoneNumber($stored_email)) {
-                            $normalized_stored = normalizePhone($stored_email);
-                            if ($normalized_stored === $input) {
-                                $found_user = $user;
-                                break;
+            // Check for query errors
+            if (!$result) {
+                error_log("Database query error in facebook-forgot-password.php: " . $conn->error);
+                $error = "A database error occurred. Please try again later.";
+            } else {
+                // If exact match failed and input looks like a phone, try normalized match (same as authenticateUser)
+                if ($result->num_rows === 0 && function_exists('isPhoneNumber') && isPhoneNumber($contact_value)) {
+                    // Get all users for this platform and check normalized phone numbers
+                    $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'facebook'");
+                    $found_user = null;
+
+                    if ($all_users) {
+                        while ($user = $all_users->fetch_assoc()) {
+                            $stored_email = $user['email'];
+                            if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
+                                if (isPhoneNumber($stored_email)) {
+                                    $normalized_stored = normalizePhone($stored_email);
+                                    if ($normalized_stored === $input) {
+                                        $found_user = $user;
+                                        break;
+                                    }
+                                }
                             }
+                        }
+                    }
+
+                    if ($found_user) {
+                        $result = $conn->query("SELECT id, email FROM users WHERE id = " . intval($found_user['id']));
+                        if (!$result) {
+                            error_log("Database query error in facebook-forgot-password.php: " . $conn->error);
+                            $error = "A database error occurred. Please try again later.";
                         }
                     }
                 }
 
-                if ($found_user) {
-                    $result = $conn->query("SELECT id, email FROM users WHERE id = " . intval($found_user['id']));
-                    if (!$result) {
-                        error_log("Database query error in facebook-forgot-password.php: " . $conn->error);
+                if (!$error && $result && $result->num_rows > 0) {
+                    $user_data = $result->fetch_assoc();
+                    $user_id = $user_data['id'];
+                    $user_email = $user_data['email'];
+
+                    // Generate reset token
+                    $token = bin2hex(random_bytes(32));
+                    $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+                    // Store token
+                    $update_result = $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE id = $user_id");
+                    if (!$update_result) {
+                        error_log("Database update error in facebook-forgot-password.php: " . $conn->error);
                         $error = "A database error occurred. Please try again later.";
+                    } else {
+                        // In a real app, you would email this link
+                        // For training purposes, we'll display it
+                        $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/facebook-reset-password.php?token=$token";
+
+                        $success = "Password reset instructions have been sent! In a real application, this would be emailed to you.";
+                        $_SESSION['reset_link'] = $reset_link;
+                        $_SESSION['reset_email'] = $user_email;
+
+                        // Log activity (if function exists)
+                        if (function_exists('logActivity')) {
+                            @logActivity($user_id, 'facebook', 'password_reset_request', "Reset token generated for $user_email");
+                        }
                     }
-                }
-            }
-
-            if (!$error && $result && $result->num_rows > 0) {
-                $user_data = $result->fetch_assoc();
-                $user_id = $user_data['id'];
-                $user_email = $user_data['email'];
-
-                // Generate reset token
-                $token = bin2hex(random_bytes(32));
-                $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
-
-                // Store token
-                $update_result = $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE id = $user_id");
-                if (!$update_result) {
-                    error_log("Database update error in facebook-forgot-password.php: " . $conn->error);
-                    $error = "A database error occurred. Please try again later.";
                 } else {
-                    // In a real app, you would email this link
-                    // For training purposes, we'll display it
-                    $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/facebook-reset-password.php?token=$token";
-
-                    $success = "Password reset instructions have been sent! In a real application, this would be emailed to you.";
-                    $_SESSION['reset_link'] = $reset_link;
-                    $_SESSION['reset_email'] = $user_email;
-
-                    // Log activity (if function exists)
-                    if (function_exists('logActivity')) {
-                        @logActivity($user_id, 'facebook', 'password_reset_request', "Reset token generated for $user_email");
+                    // For security, show same message even if account doesn't exist
+                    if (!$error) {
+                        $success = "If an account exists with this email/phone, you will receive reset instructions.";
                     }
                 }
-            } else {
-                // For security, show same message even if account doesn't exist
-                if (!$error) {
-                    $success = "If an account exists with this email/phone, you will receive reset instructions.";
-                }
             }
+        } catch (Exception $e) {
+            error_log("Error in facebook-forgot-password.php: " . $e->getMessage());
+            $error = "An error occurred. Please try again later.";
         }
     }
 }
