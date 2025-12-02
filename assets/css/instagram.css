@@ -373,6 +373,7 @@ body.instagram-signup-page {
     margin-bottom: 8px;
 }
 
+/* Default: Light theme inputs (simple, readable style) */
 .form-group input[type="text"],
 .form-group input[type="email"],
 .form-group input[type="password"],
@@ -380,48 +381,40 @@ body.instagram-signup-page {
 .form-group select {
     width: 100%;
     padding: 10px;
-    border: 1px solid #363636;
+    border: 1px solid var(--instagram-border);
     border-radius: 3px;
     font-size: 14px;
-    background-color: #262626;
-    color: #fff;
+    background-color: #fafafa;
+    color: #262626;
 }
 
-/* Light theme inputs (for reset password, forgot password pages) */
-body:not(.instagram-signup-page) .form-group input[type="text"],
-body:not(.instagram-signup-page) .form-group input[type="email"],
-body:not(.instagram-signup-page) .form-group input[type="password"],
-body:not(.instagram-signup-page) .form-group input[type="tel"],
-.instagram-card .form-group input[type="text"],
-.instagram-card .form-group input[type="email"],
-.instagram-card .form-group input[type="password"],
-.instagram-card .form-group input[type="tel"],
-.instagram-login-card .form-group input[type="text"],
-.instagram-login-card .form-group input[type="email"],
-.instagram-login-card .form-group input[type="password"],
-.instagram-login-card .form-group input[type="tel"],
-.instagram-container.centered .form-group input[type="text"],
-.instagram-container.centered .form-group input[type="email"],
-.instagram-container.centered .form-group input[type="password"],
-.instagram-container.centered .form-group input[type="tel"] {
-    background-color: #fafafa !important;
-    border-color: var(--instagram-border) !important;
-    color: #262626 !important;
+.form-group input:focus {
+    outline: none;
+    border-color: var(--instagram-blue);
+    background-color: #fff;
+    color: #262626;
 }
 
+/* Dark theme inputs - for signup and login cards (dark backgrounds) */
 .signup-card .form-group input[type="text"],
 .signup-card .form-group input[type="email"],
 .signup-card .form-group input[type="password"],
-.signup-card .form-group input[type="tel"] {
+.signup-card .form-group input[type="tel"],
+.login-card .form-group input[type="text"],
+.login-card .form-group input[type="email"],
+.login-card .form-group input[type="password"],
+.login-card .form-group input[type="tel"] {
     background-color: #262626;
     border-color: #363636;
     color: #fff;
 }
 
-.signup-card .form-group input:focus {
+.signup-card .form-group input:focus,
+.login-card .form-group input:focus {
     outline: none;
     border-color: #8e8e8e;
     background-color: #262626;
+    color: #fff;
 }
 
 .form-group label {
@@ -434,22 +427,6 @@ body:not(.instagram-signup-page) .form-group input[type="tel"],
 
 .form-group select {
     cursor: pointer;
-}
-
-.form-group input:focus {
-    outline: none;
-    border-color: var(--instagram-gray);
-    background-color: white;
-}
-
-/* Light theme input focus */
-body:not(.instagram-signup-page) .form-group input:focus,
-.instagram-card .form-group input:focus,
-.instagram-login-card .form-group input:focus,
-.instagram-container.centered .form-group input:focus {
-    background-color: #fff !important;
-    border-color: var(--instagram-blue) !important;
-    color: #262626 !important;
 }
 
 .form-group small {
