@@ -16,6 +16,11 @@ body {
     line-height: 1.5;
 }
 
+.instagram-signup-page body,
+body.instagram-signup-page {
+    background-color: #000;
+}
+
 /* Instagram gradient colors */
 :root {
     --instagram-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
@@ -205,12 +210,19 @@ body {
 .signup-prompt,
 .signup-box,
 .login-box {
-    background: white;
-    border: 1px solid var(--instagram-border);
+    background: #000;
+    border: 1px solid #363636;
     border-radius: 1px;
     padding: 20px;
     text-align: center;
     margin-bottom: 16px;
+    color: #fff;
+}
+
+.signup-card .login-box {
+    background: transparent;
+    border: none;
+    margin-top: 20px;
 }
 
 .signup-prompt p,
@@ -271,20 +283,29 @@ body {
 
 .signup-card,
 .login-card {
-    background: white;
-    border: 1px solid var(--instagram-border);
+    background: #000;
+    border: 1px solid #363636;
     border-radius: 1px;
     padding: 40px;
     margin-bottom: 10px;
+    color: #fff;
+}
+
+.instagram-signup-page {
+    background: #000;
 }
 
 .signup-subtitle {
     text-align: center;
-    color: var(--instagram-gray);
+    color: #8e8e8e;
     font-size: 17px;
     font-weight: 600;
     margin-bottom: 24px;
     line-height: 20px;
+}
+
+.signup-card .signup-subtitle {
+    color: #8e8e8e;
 }
 
 .step-indicator {
@@ -359,10 +380,26 @@ body {
 .form-group select {
     width: 100%;
     padding: 10px;
-    border: 1px solid var(--instagram-border);
+    border: 1px solid #363636;
     border-radius: 3px;
     font-size: 14px;
-    background-color: #fafafa;
+    background-color: #262626;
+    color: #fff;
+}
+
+.signup-card .form-group input[type="text"],
+.signup-card .form-group input[type="email"],
+.signup-card .form-group input[type="password"],
+.signup-card .form-group input[type="tel"] {
+    background-color: #262626;
+    border-color: #363636;
+    color: #fff;
+}
+
+.signup-card .form-group input:focus {
+    outline: none;
+    border-color: #8e8e8e;
+    background-color: #262626;
 }
 
 .form-group label {
@@ -524,10 +561,18 @@ body {
 /* Terms */
 .terms {
     font-size: 11px;
-    color: var(--instagram-gray);
+    color: #8e8e8e;
     margin: 16px 0;
     text-align: center;
     line-height: 1.5;
+}
+
+.signup-card .terms {
+    color: #8e8e8e;
+}
+
+.signup-card .terms a {
+    color: #0095f6;
 }
 
 /* Footer Links */
