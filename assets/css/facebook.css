@@ -795,10 +795,11 @@ body {
     background: linear-gradient(135deg, #1877f2 0%, #0a58ca 100%);
     color: white;
     padding: 32px;
-    border-radius: 12px;
-    margin: 30px 0;
     box-shadow: 0 6px 20px rgba(24, 119, 242, 0.3);
-    border-left: 5px solid #ffd700;
+    border-top: 5px solid #ffd700;
+    width: 100%;
+    position: relative;
+    margin-top: 0;
 }
 
 .security-info-content {

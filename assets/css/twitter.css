@@ -39,10 +39,11 @@ body {
 }
 
 .twitter-logo {
-    font-size: 18em;
+    font-size: 24em;
     color: #1d9bf0;
     margin-bottom: 30px;
     font-weight: 300;
+    line-height: 1;
 }
 
 .twitter-logo-small {
@@ -688,7 +689,7 @@ body {
     }
 
     .twitter-logo {
-        font-size: 8em;
+        font-size: 12em;
     }
 
     .twitter-sidebar h1 {
@@ -734,10 +735,11 @@ body {
     background: linear-gradient(135deg, #1d9bf0 0%, #0d7cd6 100%);
     color: white;
     padding: 32px;
-    border-radius: 12px;
-    margin: 30px 0;
     box-shadow: 0 6px 20px rgba(29, 155, 240, 0.3);
-    border-left: 5px solid #ffd700;
+    border-top: 5px solid #ffd700;
+    width: 100%;
+    position: relative;
+    margin-top: 0;
 }
 
 .security-info-content {
