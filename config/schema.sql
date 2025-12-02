@@ -2,11 +2,11 @@
 -- This file contains the complete database structure
 
 -- Create database if it doesn't exist
-CREATE DATABASE IF NOT EXISTS social_login_training
+CREATE DATABASE IF NOT EXISTS social_login
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
 
-USE social_login_training;
+USE social_login;
 
 -- Users table - stores all practice accounts across all platforms
 CREATE TABLE IF NOT EXISTS users (

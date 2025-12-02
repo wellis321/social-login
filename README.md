@@ -33,7 +33,7 @@ A training tool for Duke of Edinburgh Awards staff to practice and teach social 
    DB_HOST=localhost
    DB_USER=root
    DB_PASS=your_password
-   DB_NAME=social_login_training
+   DB_NAME=social_login
    ```
 
 3. **Create the database**

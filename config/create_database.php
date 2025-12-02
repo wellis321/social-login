@@ -40,7 +40,7 @@ loadEnv(__DIR__ . '/../.env');
 $host = getenv('DB_HOST') ?: 'localhost';
 $user = getenv('DB_USER') ?: 'root';
 $pass = getenv('DB_PASS') ?: '';
-$dbname = getenv('DB_NAME') ?: 'social_login_training';
+$dbname = getenv('DB_NAME') ?: 'social_login';
 
 echo "Creating database '$dbname'...\n";
 
