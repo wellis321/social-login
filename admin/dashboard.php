@@ -164,7 +164,7 @@ $users = $conn->query($sql);
                         <tr>
                             <th>ID</th>
                             <th>Platform</th>
-                            <th>Email</th>
+                            <th>Email/Phone</th>
                             <th>Username</th>
                             <th>Full Name</th>
                             <th>Created</th>
@@ -182,7 +182,16 @@ $users = $conn->query($sql);
                                             <?= ucfirst($user['platform']) ?>
                                         </span>
                                     </td>
-                                    <td><?= htmlspecialchars($user['email']) ?></td>
+                                    <td>
+                                        <?php
+                                        $contact = $user['email'];
+                                        if (isPhoneNumber($contact)) {
+                                            echo '<span title="Phone number">📱 ' . htmlspecialchars($contact) . '</span>';
+                                        } else {
+                                            echo '<span title="Email address">📧 ' . htmlspecialchars($contact) . '</span>';
+                                        }
+                                        ?>
+                                    </td>
                                     <td><?= $user['username'] ? '@' . htmlspecialchars($user['username']) : '-' ?></td>
                                     <td><?= htmlspecialchars($user['full_name'] ?? '-') ?></td>
                                     <td><?= date('M j, Y', strtotime($user['created_at'])) ?></td>

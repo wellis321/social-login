@@ -6,6 +6,7 @@
 
 session_start();
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/functions.php';
 
 // Check admin authentication
 if (!isset($_SESSION['admin_id'])) {
@@ -113,7 +114,7 @@ $actions = $conn->query("SELECT DISTINCT action FROM activity_log ORDER BY actio
                             <th>Platform</th>
                             <th>Action</th>
                             <th>User</th>
-                            <th>Email</th>
+                            <th>Email/Phone</th>
                             <th>IP Address</th>
                             <th>Details</th>
                         </tr>
@@ -134,7 +135,18 @@ $actions = $conn->query("SELECT DISTINCT action FROM activity_log ORDER BY actio
                                         </span>
                                     </td>
                                     <td><?= $activity['username'] ? '@' . htmlspecialchars($activity['username']) : '-' ?></td>
-                                    <td><?= htmlspecialchars($activity['email'] ?? '-') ?></td>
+                                    <td>
+                                        <?php
+                                        $contact = $activity['email'] ?? '-';
+                                        if ($contact !== '-' && isPhoneNumber($contact)) {
+                                            echo '<span title="Phone number">📱 ' . htmlspecialchars($contact) . '</span>';
+                                        } elseif ($contact !== '-') {
+                                            echo '<span title="Email address">📧 ' . htmlspecialchars($contact) . '</span>';
+                                        } else {
+                                            echo '-';
+                                        }
+                                        ?>
+                                    </td>
                                     <td><?= htmlspecialchars($activity['ip_address'] ?? '-') ?></td>
                                     <td><?= htmlspecialchars($activity['details'] ?? '-') ?></td>
                                 </tr>
