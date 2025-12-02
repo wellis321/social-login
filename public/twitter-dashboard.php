@@ -39,7 +39,7 @@ if (isset($_POST['delete_account'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home / X</title>
-    <link rel="stylesheet" href="../assets/css/twitter.css">
+    <link rel="stylesheet" href="assets/css/twitter.css">
 </head>
 <body>
     <div class="twitter-dashboard">

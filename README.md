@@ -67,12 +67,12 @@ A training tool for Duke of Edinburgh Awards staff to practice and teach social 
 ## Project Structure
 
 ```
-/public         - Web-accessible files (entry point)
-/assets         - CSS, JavaScript, images
-/includes       - PHP business logic and helper functions
-/templates      - HTML templates for each platform
-/admin          - Admin panel files
-/config         - Database configuration
+/public            - Web-accessible files (entry point)
+  /assets          - CSS, JavaScript, images (publicly accessible)
+/includes          - PHP business logic and helper functions
+/templates         - HTML templates for each platform
+/admin             - Admin panel files
+/config            - Database configuration
 ```
 
 ## Usage
