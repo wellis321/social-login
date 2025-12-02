@@ -13,24 +13,27 @@ $success = '';
 $username = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = sanitizeInput($_POST['email']);
+    $contact_type = $_POST['contact_type'] ?? 'email';
+    $contact_value = sanitizeInput($_POST['contact_value']);
 
-    if (empty($email)) {
-        $error = "Email is required";
-    } elseif (!validateEmail($email)) {
+    if (empty($contact_value)) {
+        $error = $contact_type === 'email' ? "Email is required" : "Phone number is required";
+    } elseif ($contact_type === 'email' && !validateEmail($contact_value)) {
         $error = "Please enter a valid email address";
     } else {
         $conn = getDbConnection();
-        $email_safe = $conn->real_escape_string($email);
+        $contact_safe = $conn->real_escape_string($contact_value);
 
-        $result = $conn->query("SELECT username FROM users WHERE email = '$email_safe' AND platform = 'instagram'");
+        $result = $conn->query("SELECT username FROM users WHERE email = '$contact_safe' AND platform = 'instagram'");
 
         if ($result->num_rows > 0) {
             $user = $result->fetch_assoc();
             $username = $user['username'];
             $success = "Account found! Your username is displayed below.";
         } else {
-            $error = "No Instagram account found with this email address.";
+            $error = $contact_type === 'email'
+                ? "No Instagram account found with this email address."
+                : "No Instagram account found with this phone number.";
         }
     }
 }
@@ -48,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="instagram-login-card">
             <div class="instagram-logo-small">Instagram</div>
             <h1>Forgot Your Username?</h1>
-            <p>Enter your email address to find your username.</p>
+            <p>Enter your email address or phone number to find your username.</p>
 
             <?php if ($error): ?>
                 <div class="error-box">
@@ -69,20 +72,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php else: ?>
                 <div class="help-box">
                     <h3>👤 Find Your Username</h3>
-                    <p>Enter the email address you used when creating your Instagram account. We'll show you the username associated with that email.</p>
+                    <p>Enter the email address or phone number you used when creating your Instagram account. We'll show you the username associated with that contact information.</p>
                     <p><strong>Remember:</strong> Your username appears as @username on Instagram</p>
                 </div>
 
                 <form method="POST">
                     <div class="form-group">
-                        <label for="email">Email address</label>
-                        <input type="email" id="email" name="email"
-                               value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                        <label>Search by:</label>
+                        <select name="contact_type" id="contact_type" onchange="updatePlaceholder()">
+                            <option value="email">Email address</option>
+                            <option value="phone">Phone number</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact_value" id="contact_label">Email address</label>
+                        <input type="text" id="contact_value" name="contact_value"
+                               value="<?= htmlspecialchars($_POST['contact_value'] ?? '') ?>"
                                placeholder="your@email.com" required autofocus>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-block">Find My Username</button>
                 </form>
+
+                <script>
+                function updatePlaceholder() {
+                    const type = document.getElementById('contact_type').value;
+                    const input = document.getElementById('contact_value');
+                    const label = document.getElementById('contact_label');
+
+                    if (type === 'email') {
+                        label.textContent = 'Email address';
+                        input.placeholder = 'your@email.com';
+                        input.type = 'email';
+                    } else {
+                        label.textContent = 'Phone number';
+                        input.placeholder = '+1 234 567 8900';
+                        input.type = 'tel';
+                    }
+                }
+                </script>
             <?php endif; ?>
 
             <div class="footer-links">
