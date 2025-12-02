@@ -1,0 +1,694 @@
+/**
+ * Twitter/X Platform Styling
+ * Replicates the look and feel of X (Twitter)
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #000;
+    color: #e7e9ea;
+    line-height: 1.5;
+}
+
+/* Twitter Container - Landing Page */
+.twitter-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.twitter-container.centered {
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+}
+
+.twitter-sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    background-color: #000;
+}
+
+.twitter-logo {
+    font-size: 18em;
+    color: #1d9bf0;
+    margin-bottom: 30px;
+    font-weight: 300;
+}
+
+.twitter-logo-small {
+    font-size: 2.5em;
+    color: #1d9bf0;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.twitter-sidebar h1 {
+    font-size: 4em;
+    font-weight: 700;
+    color: #e7e9ea;
+}
+
+.twitter-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+    background-color: #000;
+}
+
+.twitter-card {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.twitter-card h2 {
+    font-size: 2.5em;
+    margin-bottom: 30px;
+    color: #e7e9ea;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 24px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #1d9bf0;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #1a8cd8;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: #1d9bf0;
+    border: 1px solid #536471;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(29, 155, 240, 0.1);
+}
+
+.btn-danger {
+    background-color: #f4212e;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #d01826;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.button-row .btn {
+    flex: 1;
+}
+
+/* Terms and Separator */
+.terms {
+    padding: 10px 0;
+}
+
+.terms p {
+    font-size: 11px;
+    color: #71767b;
+    margin-bottom: 8px;
+}
+
+.separator {
+    margin: 20px 0;
+    text-align: center;
+    position: relative;
+}
+
+.separator span {
+    background-color: #000;
+    padding: 0 10px;
+    color: #71767b;
+    font-size: 14px;
+}
+
+.divider {
+    margin: 20px 0;
+    text-align: center;
+    position: relative;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #2f3336;
+}
+
+.divider span {
+    background-color: #000;
+    padding: 0 10px;
+    position: relative;
+    color: #71767b;
+    font-size: 14px;
+}
+
+/* Help Section */
+.help-section {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #16181c;
+    border-radius: 16px;
+    border: 1px solid #2f3336;
+}
+
+.help-section h3 {
+    color: #1d9bf0;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.help-section ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.help-section li {
+    margin-bottom: 12px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.help-section li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #1d9bf0;
+}
+
+.help-text {
+    background-color: #16181c;
+    padding: 10px;
+    border-radius: 8px;
+    border-left: 3px solid #1d9bf0;
+}
+
+/* Footer */
+.twitter-footer {
+    margin-top: 40px;
+    text-align: center;
+    color: #71767b;
+    font-size: 13px;
+}
+
+.twitter-footer a {
+    color: #1d9bf0;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.twitter-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Signup/Login Cards */
+.twitter-signup-card,
+.twitter-login-card {
+    background-color: #000;
+    max-width: 600px;
+    width: 100%;
+    padding: 40px;
+}
+
+.twitter-signup-card h1,
+.twitter-login-card h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+    color: #e7e9ea;
+}
+
+.step-indicator {
+    color: #71767b;
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+/* Progress Bar */
+.progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.progress-step {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #2f3336;
+    color: #71767b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.progress-step.active {
+    background-color: #1d9bf0;
+    color: #fff;
+}
+
+.progress-line {
+    width: 60px;
+    height: 2px;
+    background-color: #2f3336;
+}
+
+.progress-line.active {
+    background-color: #1d9bf0;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #e7e9ea;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: #000;
+    border: 1px solid #2f3336;
+    border-radius: 4px;
+    color: #e7e9ea;
+    font-size: 15px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #1d9bf0;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 6px;
+    color: #71767b;
+    font-size: 13px;
+}
+
+.input-with-prefix {
+    display: flex;
+    border: 1px solid #2f3336;
+    border-radius: 4px;
+    background-color: #000;
+}
+
+.input-with-prefix:focus-within {
+    border-color: #1d9bf0;
+}
+
+.input-with-prefix .prefix {
+    padding: 12px 0 12px 16px;
+    color: #71767b;
+}
+
+.input-with-prefix input {
+    border: none;
+    padding-left: 4px;
+}
+
+/* Help and Info Boxes */
+.help-box,
+.info-box {
+    background-color: #16181c;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border: 1px solid #2f3336;
+}
+
+.help-box h3 {
+    color: #1d9bf0;
+    margin-bottom: 12px;
+    font-size: 1.1em;
+}
+
+.help-box p,
+.info-box p {
+    margin-bottom: 10px;
+    color: #e7e9ea;
+}
+
+.help-box ul,
+.info-box ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.help-box li,
+.info-box li {
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+    color: #e7e9ea;
+}
+
+.help-box li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #1d9bf0;
+}
+
+/* Error Box */
+.error-box {
+    background-color: #2f1618;
+    border: 1px solid #f4212e;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.error-box p {
+    color: #f4212e;
+    margin-bottom: 8px;
+}
+
+.error-help {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #5a2328;
+}
+
+.error-help p {
+    color: #e7e9ea;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.error-help ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.error-help li {
+    color: #e7e9ea;
+    margin-bottom: 6px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.error-help li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #f4212e;
+}
+
+/* Footer Links */
+.footer-links {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.footer-links p,
+.footer-links a {
+    color: #71767b;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.footer-links a {
+    color: #1d9bf0;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.footer-links p {
+    margin-bottom: 10px;
+}
+
+.secondary-link {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/* Dashboard */
+.twitter-dashboard {
+    min-height: 100vh;
+    background-color: #000;
+}
+
+.twitter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #2f3336;
+}
+
+.nav-logo {
+    font-size: 1.8em;
+    color: #1d9bf0;
+}
+
+.nav-user {
+    color: #e7e9ea;
+    font-weight: 600;
+}
+
+.dashboard-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.success-message {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: linear-gradient(135deg, #1d9bf0 0%, #1a8cd8 100%);
+    border-radius: 16px;
+}
+
+.success-message h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.welcome-text {
+    font-size: 1.3em;
+    margin-top: 10px;
+}
+
+.learning-box {
+    background-color: #16181c;
+    padding: 30px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    border: 1px solid #2f3336;
+}
+
+.learning-box h2 {
+    color: #1d9bf0;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+.learning-section {
+    margin-bottom: 30px;
+}
+
+.learning-section h3 {
+    color: #e7e9ea;
+    margin-bottom: 12px;
+    font-size: 1.3em;
+}
+
+.learning-section p {
+    color: #e7e9ea;
+    margin-bottom: 10px;
+}
+
+.learning-section ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.learning-section li {
+    color: #e7e9ea;
+    margin-bottom: 10px;
+    padding-left: 25px;
+    position: relative;
+}
+
+.learning-section li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #00ba7c;
+    font-weight: 700;
+}
+
+.learning-section.warning li::before {
+    content: '⚠';
+    color: #ffd400;
+}
+
+.account-info {
+    background-color: #16181c;
+    padding: 30px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    border: 1px solid #2f3336;
+}
+
+.account-info h3 {
+    color: #e7e9ea;
+    margin-bottom: 20px;
+}
+
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.info-table tr {
+    border-bottom: 1px solid #2f3336;
+}
+
+.info-table td {
+    padding: 12px 0;
+    color: #e7e9ea;
+}
+
+.info-table td:first-child {
+    color: #71767b;
+    width: 40%;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.danger-zone {
+    background-color: #2f1618;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #5a2328;
+    margin-bottom: 30px;
+}
+
+.danger-zone h3 {
+    color: #f4212e;
+    margin-bottom: 12px;
+}
+
+.danger-zone p {
+    color: #e7e9ea;
+    margin-bottom: 15px;
+}
+
+.dashboard-footer {
+    text-align: center;
+    padding: 30px;
+    color: #71767b;
+    font-size: 14px;
+    border-top: 1px solid #2f3336;
+    margin-top: 40px;
+}
+
+.dashboard-footer p {
+    margin-bottom: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .twitter-container {
+        flex-direction: column;
+    }
+
+    .twitter-sidebar {
+        padding: 20px;
+    }
+
+    .twitter-logo {
+        font-size: 8em;
+    }
+
+    .twitter-sidebar h1 {
+        font-size: 2.5em;
+    }
+}
+
+@media (max-width: 768px) {
+    .twitter-card h2 {
+        font-size: 2em;
+    }
+
+    .twitter-signup-card,
+    .twitter-login-card {
+        padding: 20px;
+    }
+
+    .success-message h1 {
+        font-size: 1.8em;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .button-row {
+        flex-direction: column;
+    }
+}
