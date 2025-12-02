@@ -12,38 +12,90 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = sanitizeInput($_POST['email']);
+    $contact_value = sanitizeInput($_POST['contact_value'] ?? '');
 
-    if (empty($email)) {
-        $error = "Email is required";
-    } elseif (!validateEmail($email)) {
-        $error = "Please enter a valid email address";
+    if (empty($contact_value)) {
+        $error = "Email address or phone number is required";
     } else {
         $conn = getDbConnection();
-        $email_safe = $conn->real_escape_string($email);
 
-        // Check if account exists
-        $result = $conn->query("SELECT id FROM users WHERE email = '$email_safe' AND platform = 'instagram'");
+        // Normalize the input - if it's a phone number, normalize it (same as authenticateUser)
+        $input = trim($contact_value);
+        if (isPhoneNumber($input)) {
+            $input = normalizePhone($input);
+        }
+        $input_safe = $conn->real_escape_string($input);
 
-        if ($result->num_rows > 0) {
-            // Generate reset token
-            $token = bin2hex(random_bytes(32));
-            $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+        // Try exact match first
+        $result = $conn->query("SELECT id, email FROM users WHERE email = '$input_safe' AND platform = 'instagram'");
 
-            // Store token
-            $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE email = '$email_safe' AND platform = 'instagram'");
-
-            // In a real app, you would email this link
-            // For training purposes, we'll display it
-            $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/instagram-reset-password.php?token=$token";
-
-            $success = "Password reset instructions have been sent! In a real application, this would be emailed to you.";
-            $_SESSION['reset_link'] = $reset_link;
-
-            logActivity($result->fetch_assoc()['id'], 'instagram', 'password_reset_request', "Reset token generated for $email");
+        // Check for query errors
+        if (!$result) {
+            error_log("Database query error in instagram-forgot-password.php: " . $conn->error);
+            $error = "A database error occurred. Please try again later.";
         } else {
-            // For security, show same message even if account doesn't exist
-            $success = "If an account exists with this email, you will receive reset instructions.";
+            // If exact match failed and input looks like a phone, try normalized match (same as authenticateUser)
+            if ($result->num_rows === 0 && isPhoneNumber($contact_value)) {
+                // Get all users for this platform and check normalized phone numbers
+                $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'instagram'");
+                $found_user = null;
+
+                if ($all_users) {
+                    while ($user = $all_users->fetch_assoc()) {
+                        $stored_email = $user['email'];
+                        if (isPhoneNumber($stored_email)) {
+                            $normalized_stored = normalizePhone($stored_email);
+                            if ($normalized_stored === $input) {
+                                $found_user = $user;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if ($found_user) {
+                    $result = $conn->query("SELECT id, email FROM users WHERE id = " . intval($found_user['id']));
+                    if (!$result) {
+                        error_log("Database query error in instagram-forgot-password.php: " . $conn->error);
+                        $error = "A database error occurred. Please try again later.";
+                    }
+                }
+            }
+
+            if (!$error && $result && $result->num_rows > 0) {
+                $user_data = $result->fetch_assoc();
+                $user_id = $user_data['id'];
+                $user_email = $user_data['email'];
+
+                // Generate reset token
+                $token = bin2hex(random_bytes(32));
+                $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+                // Store token
+                $update_result = $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE id = $user_id");
+                if (!$update_result) {
+                    error_log("Database update error in instagram-forgot-password.php: " . $conn->error);
+                    $error = "A database error occurred. Please try again later.";
+                } else {
+                    // In a real app, you would email this link
+                    // For training purposes, we'll display it
+                    $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/instagram-reset-password.php?token=$token";
+
+                    $success = "Password reset instructions have been sent! In a real application, this would be emailed to you.";
+                    $_SESSION['reset_link'] = $reset_link;
+                    $_SESSION['reset_email'] = $user_email;
+
+                    // Log activity (if function exists)
+                    if (function_exists('logActivity')) {
+                        @logActivity($user_id, 'instagram', 'password_reset_request', "Reset token generated for $user_email");
+                    }
+                }
+            } else {
+                // For security, show same message even if account doesn't exist
+                if (!$error) {
+                    $success = "If an account exists with this email/phone, you will receive reset instructions.";
+                }
+            }
         }
     }
 }
@@ -61,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="instagram-login-card">
             <div class="instagram-logo-small">Instagram</div>
             <h1>Forgot Password?</h1>
-            <p>Enter your email address and we'll help you reset your password.</p>
+            <p>Enter your email address or phone number and we'll help you reset your password.</p>
 
             <?php if ($error): ?>
                 <div class="error-box">
@@ -86,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="help-box">
                     <h3>🔒 How Password Reset Works</h3>
                     <ul>
-                        <li>Enter your email address</li>
+                        <li>Enter your email address or phone number</li>
                         <li>We'll send you a secure reset link</li>
                         <li>Click the link to create a new password</li>
                         <li>The link expires after 1 hour for security</li>
@@ -96,10 +148,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <form method="POST">
                     <div class="form-group">
-                        <label for="email">Email address</label>
-                        <input type="email" id="email" name="email"
-                               value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                               placeholder="your@email.com" required autofocus>
+                        <label for="contact_value">Email address or phone number</label>
+                        <input type="text" id="contact_value" name="contact_value"
+                               value="<?= htmlspecialchars($_POST['contact_value'] ?? '') ?>"
+                               placeholder="Email or phone number" required autofocus>
+                        <small>Enter the email address or phone number you used when signing up</small>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-block">Send Reset Instructions</button>
