@@ -74,6 +74,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token = bin2hex(random_bytes(32));
             $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
+            // Check if reset_token columns exist, if not, add them
+            $check_columns = $conn->query("SHOW COLUMNS FROM users LIKE 'reset_token'");
+            if ($check_columns->num_rows === 0) {
+                // Add the columns if they don't exist
+                $conn->query("ALTER TABLE users ADD COLUMN reset_token VARCHAR(64) DEFAULT NULL AFTER date_of_birth");
+                $conn->query("ALTER TABLE users ADD COLUMN reset_token_expires TIMESTAMP NULL DEFAULT NULL AFTER reset_token");
+            }
+
             // Store token
             $update_result = $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE id = $user_id");
 
