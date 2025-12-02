@@ -287,6 +287,66 @@ body {
     line-height: 20px;
 }
 
+.step-indicator {
+    color: var(--instagram-gray);
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Progress Bar */
+.signup-card .progress-bar {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-direction: row;
+}
+
+.signup-card .progress-step {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    background-color: #efefef !important;
+    color: var(--instagram-gray) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.signup-card .progress-step.active {
+    background-color: var(--instagram-blue) !important;
+    color: #fff !important;
+}
+
+.signup-card .progress-line {
+    width: 60px !important;
+    height: 2px !important;
+    background-color: #efefef !important;
+    flex-shrink: 0;
+}
+
+.signup-card .progress-line.active {
+    background-color: var(--instagram-blue) !important;
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.button-row .btn {
+    flex: 1;
+}
+
+.btn-block {
+    width: 100%;
+}
+
 /* Forms */
 .form-group {
     margin-bottom: 8px;
@@ -294,13 +354,27 @@ body {
 
 .form-group input[type="text"],
 .form-group input[type="email"],
-.form-group input[type="password"] {
+.form-group input[type="password"],
+.form-group input[type="tel"],
+.form-group select {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--instagram-border);
     border-radius: 3px;
     font-size: 14px;
     background-color: #fafafa;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #262626;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.form-group select {
+    cursor: pointer;
 }
 
 .form-group input:focus {
@@ -358,6 +432,12 @@ body {
     left: 0;
     color: #0095f6;
     font-weight: bold;
+}
+
+.help-box .warning-text {
+    color: #ed4956;
+    font-weight: 600;
+    margin-top: 8px;
 }
 
 .help-box.tips {

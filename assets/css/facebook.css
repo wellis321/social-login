@@ -303,6 +303,66 @@ body {
     margin-bottom: 20px;
 }
 
+.step-indicator {
+    color: #606770;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Progress Bar */
+.signup-card .progress-bar {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-direction: row;
+}
+
+.signup-card .progress-step {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    background-color: #e4e6eb !important;
+    color: #606770 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.signup-card .progress-step.active {
+    background-color: #1877f2 !important;
+    color: #fff !important;
+}
+
+.signup-card .progress-line {
+    width: 60px !important;
+    height: 2px !important;
+    background-color: #e4e6eb !important;
+    flex-shrink: 0;
+}
+
+.signup-card .progress-line.active {
+    background-color: #1877f2 !important;
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.button-row .btn {
+    flex: 1;
+}
+
+.btn-block {
+    width: 100%;
+}
+
 /* Forms */
 .form-group {
     margin-bottom: 16px;
@@ -324,13 +384,19 @@ body {
 .form-group input[type="text"],
 .form-group input[type="email"],
 .form-group input[type="password"],
-.form-group input[type="date"] {
+.form-group input[type="date"],
+.form-group input[type="tel"],
+.form-group select {
     width: 100%;
     padding: 14px 16px;
     border: 1px solid #dddfe2;
     border-radius: 6px;
     font-size: 17px;
     background-color: #f5f6f7;
+}
+
+.form-group select {
+    cursor: pointer;
 }
 
 .form-group input:focus {
@@ -421,6 +487,12 @@ body {
 
 .help-box.tips h4 {
     color: #f7b500;
+}
+
+.help-box .warning-text {
+    color: #f02849;
+    font-weight: 600;
+    margin-top: 8px;
 }
 
 .info-box {
