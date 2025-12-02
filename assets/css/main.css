@@ -115,17 +115,27 @@ main {
     overflow: hidden;
 }
 
+.platform-card.instagram .platform-icon {
+    font-size: 1em;
+    width: 80px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .platform-icon img {
     max-width: 100%;
     height: auto;
     display: block;
 }
 
+.platform-card.instagram .platform-icon img,
 .instagram-logo-img {
     width: 64px !important;
     height: 64px !important;
     max-width: 64px !important;
     max-height: 64px !important;
+    min-width: 64px !important;
+    min-height: 64px !important;
     object-fit: contain;
     margin: 0 auto;
     flex-shrink: 0;
