@@ -43,7 +43,9 @@ require_once __DIR__ . '/includes/functions.php';
                     </a>
 
                     <a href="instagram.php" class="platform-card instagram">
-                        <div class="platform-icon">📸</div>
+                        <div class="platform-icon">
+                            <img src="assets/images/instagram-logo-with-colorful-gradient_1273375-1516.jpg" alt="Instagram" class="instagram-logo-img">
+                        </div>
                         <h3>Instagram</h3>
                         <p><strong>What is Instagram?</strong> Instagram is a photo and video sharing platform where you can share visual content, follow friends and interests, and discover creative content through photos, videos, and stories.</p>
                         <p style="margin-top: 8px;"><strong>Why use it?</strong> Share your life through photos and videos, follow friends and influencers, discover new interests, express your creativity, and stay connected visually. Great for visual storytelling.</p>

@@ -107,6 +107,21 @@ main {
     font-size: 4em;
     margin-bottom: 15px;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.platform-icon img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.instagram-logo-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
 }
 
 .platform-card.twitter .platform-icon {
