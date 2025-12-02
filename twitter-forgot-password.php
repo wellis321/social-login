@@ -29,52 +29,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Try exact match first
         $result = $conn->query("SELECT id, email FROM users WHERE email = '$input_safe' AND platform = 'twitter'");
 
-        // If exact match failed and input looks like a phone, try normalized match (same as authenticateUser)
-        if ($result->num_rows === 0 && isPhoneNumber($contact_value)) {
-            // Get all users for this platform and check normalized phone numbers
-            $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'twitter'");
-            $found_user = null;
+        // Check for query errors
+        if (!$result) {
+            error_log("Database query error in twitter-forgot-password.php: " . $conn->error);
+            $error = "A database error occurred. Please try again later.";
+        } else {
+            // If exact match failed and input looks like a phone, try normalized match (same as authenticateUser)
+            if ($result->num_rows === 0 && isPhoneNumber($contact_value)) {
+                // Get all users for this platform and check normalized phone numbers
+                $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'twitter'");
+                $found_user = null;
 
-            while ($user = $all_users->fetch_assoc()) {
-                $stored_email = $user['email'];
-                if (isPhoneNumber($stored_email)) {
-                    $normalized_stored = normalizePhone($stored_email);
-                    if ($normalized_stored === $input) {
-                        $found_user = $user;
-                        break;
+                if ($all_users) {
+                    while ($user = $all_users->fetch_assoc()) {
+                        $stored_email = $user['email'];
+                        if (isPhoneNumber($stored_email)) {
+                            $normalized_stored = normalizePhone($stored_email);
+                            if ($normalized_stored === $input) {
+                                $found_user = $user;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if ($found_user) {
+                    $result = $conn->query("SELECT id, email FROM users WHERE id = " . intval($found_user['id']));
+                    if (!$result) {
+                        error_log("Database query error in twitter-forgot-password.php: " . $conn->error);
+                        $error = "A database error occurred. Please try again later.";
                     }
                 }
             }
 
-            if ($found_user) {
-                $result = $conn->query("SELECT id, email FROM users WHERE id = " . intval($found_user['id']));
+            if (!$error && $result && $result->num_rows > 0) {
+                $user_data = $result->fetch_assoc();
+                $user_id = $user_data['id'];
+                $user_email = $user_data['email'];
+
+                // Generate reset token
+                $token = bin2hex(random_bytes(32));
+                $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+                // Store token
+                $update_result = $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE id = $user_id");
+                if (!$update_result) {
+                    error_log("Database update error in twitter-forgot-password.php: " . $conn->error);
+                    $error = "A database error occurred. Please try again later.";
+                } else {
+                    // In a real app, you would email this link
+                    // For training purposes, we'll display it
+                    $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/twitter-reset-password.php?token=$token";
+
+                    $success = "Password reset instructions have been sent! In a real application, this would be emailed to you.";
+                    $_SESSION['reset_link'] = $reset_link;
+                    $_SESSION['reset_email'] = $user_email;
+
+                    // Log activity (if function exists)
+                    if (function_exists('logActivity')) {
+                        @logActivity($user_id, 'twitter', 'password_reset_request', "Reset token generated for $user_email");
+                    }
+                }
+            } else {
+                // For security, show same message even if account doesn't exist
+                if (!$error) {
+                    $success = "If an account exists with this email/phone, you will receive reset instructions.";
+                }
             }
-        }
-
-        if ($result && $result->num_rows > 0) {
-            $user_data = $result->fetch_assoc();
-            $user_id = $user_data['id'];
-            $user_email = $user_data['email'];
-
-            // Generate reset token
-            $token = bin2hex(random_bytes(32));
-            $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
-
-            // Store token
-            $conn->query("UPDATE users SET reset_token = '$token', reset_token_expires = '$expires' WHERE id = $user_id");
-
-            // In a real app, you would email this link
-            // For training purposes, we'll display it
-            $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/twitter-reset-password.php?token=$token";
-
-            $success = "Password reset instructions have been sent! In a real application, this would be emailed to you.";
-            $_SESSION['reset_link'] = $reset_link;
-            $_SESSION['reset_email'] = $user_email;
-
-            logActivity($user_id, 'twitter', 'password_reset_request', "Reset token generated for $user_email");
-        } else {
-            // For security, show same message even if account doesn't exist
-            $success = "If an account exists with this email/phone, you will receive reset instructions.";
         }
     }
 }
