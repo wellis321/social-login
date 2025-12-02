@@ -1,0 +1,27 @@
+# Enable PHP error display for debugging (disable in production)
+# php_flag display_errors off
+# php_flag display_startup_errors off
+
+# Set default index files
+DirectoryIndex index.php index.html
+
+# Security: Prevent directory browsing
+Options -Indexes
+
+# Enable URL rewriting
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If the file or directory exists, serve it
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Otherwise, redirect to index.php
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Protect sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
