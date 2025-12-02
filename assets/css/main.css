@@ -118,6 +118,7 @@ main {
 .platform-card.instagram .platform-icon {
     font-size: 1em;
     width: 80px;
+    max-width: 80px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -128,8 +129,10 @@ main {
     display: block;
 }
 
-.platform-card.instagram .platform-icon img,
-.instagram-logo-img {
+/* Instagram logo must be more specific and come after general img rule */
+.platform-card.instagram .platform-icon img.instagram-logo-img,
+.platform-card.instagram .platform-icon .instagram-logo-img,
+.platform-card.instagram img.instagram-logo-img {
     width: 64px !important;
     height: 64px !important;
     max-width: 64px !important;
