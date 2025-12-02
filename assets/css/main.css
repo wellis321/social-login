@@ -116,11 +116,13 @@ main {
 }
 
 .platform-card.instagram .platform-icon {
-    font-size: 1em;
-    width: 80px;
-    max-width: 80px;
+    font-size: 1em !important;
+    width: 80px !important;
+    max-width: 80px !important;
+    min-width: 80px !important;
     margin-left: auto;
     margin-right: auto;
+    flex: 0 0 80px !important;
 }
 
 .platform-icon img {
@@ -139,9 +141,12 @@ main {
     max-height: 64px !important;
     min-width: 64px !important;
     min-height: 64px !important;
-    object-fit: contain;
-    margin: 0 auto;
-    flex-shrink: 0;
+    object-fit: contain !important;
+    margin: 0 auto !important;
+    flex: 0 0 64px !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    display: block !important;
 }
 
 .platform-card.twitter .platform-icon {
