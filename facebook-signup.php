@@ -30,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($password)) {
         $errors[] = "Password is required";
-    } elseif (strlen($password) < 6) {
-        $errors[] = "Password must be at least 6 characters long";
+    } elseif (strlen($password) < 8) {
+        $errors[] = "Password must be at least 8 characters long";
     }
 
     if (empty($full_name)) {
@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <ul>
                         <li><strong>Your name:</strong> Use your real name so friends can find you</li>
                         <li><strong>Email address:</strong> We'll send a confirmation to this email</li>
-                        <li><strong>Password:</strong> Choose something secure (at least 6 characters)</li>
+                        <li><strong>Password:</strong> Choose something secure (at least 8 characters)</li>
                         <li><strong>Birthday:</strong> You must be at least 13 years old to use Facebook</li>
                     </ul>
                 </div>
@@ -127,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label for="password">New password *</label>
                         <input type="password" id="password" name="password"
                                placeholder="Password" required>
-                        <small>At least 6 characters</small>
+                        <small>At least 8 characters</small>
                     </div>
 
                     <div class="form-group">
