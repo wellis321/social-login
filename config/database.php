@@ -50,7 +50,9 @@ function getDbConnection() {
         $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
         if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
+            // Log error but don't expose details to user
+            error_log("Database connection failed: " . $conn->connect_error);
+            die("Database connection error. Please contact the administrator.");
         }
 
         $conn->set_charset("utf8mb4");
@@ -119,14 +121,29 @@ function initializeDatabase() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     if (!$conn->query($sql)) {
-        die("Error creating activity_log table: " . $conn->error);
+        error_log("Error creating activity_log table: " . $conn->error);
+        return false;
     }
 
-    // Create default admin account (username: admin, password: admin123)
-    // Change this password in production!
-    $default_admin_hash = password_hash('admin123', PASSWORD_DEFAULT);
-    $conn->query("INSERT IGNORE INTO admin_users (username, password_hash, email)
-                  VALUES ('admin', '$default_admin_hash', 'admin@example.com')");
+    // Rate limits table - for rate limiting security
+    $sql = "CREATE TABLE IF NOT EXISTS rate_limits (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        action VARCHAR(50) NOT NULL COMMENT 'login, signup, password_reset, etc.',
+        identifier VARCHAR(255) NOT NULL COMMENT 'email, username, or other identifier',
+        ip_address VARCHAR(45) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_action_identifier (action, identifier),
+        INDEX idx_action_ip (action, ip_address),
+        INDEX idx_created_at (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+
+    if (!$conn->query($sql)) {
+        error_log("Error creating rate_limits table: " . $conn->error);
+        return false;
+    }
+
+    // Note: Default admin account should be created manually or through setup script
+    // for security reasons. Do not create default accounts automatically.
 
     return true;
 }
@@ -134,15 +151,10 @@ function initializeDatabase() {
 // Log activity
 function logActivity($user_id, $platform, $action, $details = null) {
     $conn = getDbConnection();
-    $user_id = $user_id ? intval($user_id) : 'NULL';
-    $platform = $conn->real_escape_string($platform);
-    $action = $conn->real_escape_string($action);
-    $details = $details ? "'" . $conn->real_escape_string($details) . "'" : 'NULL';
     $ip_address = $_SERVER['REMOTE_ADDR'] ?? null;
-    $ip_address = $ip_address ? "'" . $conn->real_escape_string($ip_address) . "'" : 'NULL';
 
-    $sql = "INSERT INTO activity_log (user_id, platform, action, details, ip_address)
-            VALUES ($user_id, '$platform', '$action', $details, $ip_address)";
+    $stmt = $conn->prepare("INSERT INTO activity_log (user_id, platform, action, details, ip_address) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("issss", $user_id, $platform, $action, $details, $ip_address);
 
-    return $conn->query($sql);
+    return $stmt->execute();
 }

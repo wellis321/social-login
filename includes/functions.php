@@ -4,12 +4,92 @@
  */
 
 /**
+ * Initialize secure session settings
+ */
+function initSecureSession() {
+    if (session_status() === PHP_SESSION_NONE) {
+        // Configure secure session settings
+        ini_set('session.cookie_httponly', 1);
+        ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 1 : 0);
+        ini_set('session.use_strict_mode', 1);
+        ini_set('session.cookie_samesite', 'Strict');
+        session_start();
+
+        // Regenerate session ID periodically to prevent fixation
+        if (!isset($_SESSION['created'])) {
+            $_SESSION['created'] = time();
+        } else if (time() - $_SESSION['created'] > 1800) {
+            session_regenerate_id(true);
+            $_SESSION['created'] = time();
+        }
+    }
+}
+
+/**
+ * Generate CSRF token
+ */
+function generateCSRFToken() {
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Validate CSRF token
+ */
+function validateCSRFToken($token) {
+    if (!isset($_SESSION['csrf_token'])) {
+        return false;
+    }
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
+/**
+ * Rate limiting: Check if action is allowed
+ */
+function checkRateLimit($action, $identifier, $max_attempts = 5, $time_window = 300) {
+    $conn = getDbConnection();
+    $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+    // Check if rate_limits table exists
+    $table_check = $conn->query("SHOW TABLES LIKE 'rate_limits'");
+    if ($table_check->num_rows === 0) {
+        // Table doesn't exist yet, allow the action (graceful degradation)
+        return true;
+    }
+
+    // Clean old entries (older than time_window seconds)
+    $cleanup_sql = "DELETE FROM rate_limits WHERE created_at < DATE_SUB(NOW(), INTERVAL $time_window SECOND)";
+    $conn->query($cleanup_sql);
+
+    // Count attempts in time window
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM rate_limits WHERE action = ? AND (identifier = ? OR ip_address = ?) AND created_at > DATE_SUB(NOW(), INTERVAL ? SECOND)");
+    $stmt->bind_param("sssi", $action, $identifier, $ip_address, $time_window);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $attempts = $row['count'];
+
+    if ($attempts >= $max_attempts) {
+        return false;
+    }
+
+    // Record this attempt
+    $stmt = $conn->prepare("INSERT INTO rate_limits (action, identifier, ip_address) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $action, $identifier, $ip_address);
+    $stmt->execute();
+
+    return true;
+}
+
+/**
  * Sanitize user input
  */
 function sanitizeInput($data) {
     $data = trim($data);
     $data = stripslashes($data);
-    $data = htmlspecialchars($data);
+    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
     return $data;
 }
 
@@ -49,11 +129,17 @@ function isPhoneNumber($value) {
  */
 function userExists($email, $platform) {
     $conn = getDbConnection();
-    $email = $conn->real_escape_string($email);
-    $platform = $conn->real_escape_string($platform);
 
-    $sql = "SELECT id FROM users WHERE email = '$email' AND platform = '$platform'";
-    $result = $conn->query($sql);
+    // Normalize email/phone
+    $normalized_email = $email;
+    if (isPhoneNumber($email)) {
+        $normalized_email = normalizePhone($email);
+    }
+
+    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND platform = ?");
+    $stmt->bind_param("ss", $normalized_email, $platform);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     return $result->num_rows > 0;
 }
@@ -64,29 +150,22 @@ function userExists($email, $platform) {
 function createUser($platform, $data) {
     $conn = getDbConnection();
 
-    $platform = $conn->real_escape_string($platform);
-    $email = $conn->real_escape_string($data['email']);
-
     // Normalize phone numbers for consistent storage
+    $email = $data['email'];
     if (isPhoneNumber($email)) {
         $email = normalizePhone($email);
     }
 
-    $username = isset($data['username']) ? $conn->real_escape_string($data['username']) : null;
+    $username = isset($data['username']) ? $data['username'] : null;
     $password_hash = password_hash($data['password'], PASSWORD_DEFAULT);
-    $full_name = isset($data['full_name']) ? $conn->real_escape_string($data['full_name']) : null;
-    $phone = isset($data['phone']) ? $conn->real_escape_string($data['phone']) : null;
-    $dob = isset($data['date_of_birth']) ? $conn->real_escape_string($data['date_of_birth']) : null;
+    $full_name = isset($data['full_name']) ? $data['full_name'] : null;
+    $phone = isset($data['phone']) ? $data['phone'] : null;
+    $dob = isset($data['date_of_birth']) ? $data['date_of_birth'] : null;
 
-    $sql = "INSERT INTO users (platform, email, username, password_hash, full_name, phone, date_of_birth)
-            VALUES ('$platform', '$email', " .
-            ($username ? "'$username'" : "NULL") . ", " .
-            "'$password_hash', " .
-            ($full_name ? "'$full_name'" : "NULL") . ", " .
-            ($phone ? "'$phone'" : "NULL") . ", " .
-            ($dob ? "'$dob'" : "NULL") . ")";
+    $stmt = $conn->prepare("INSERT INTO users (platform, email, username, password_hash, full_name, phone, date_of_birth) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssss", $platform, $email, $username, $password_hash, $full_name, $phone, $dob);
 
-    return $conn->query($sql);
+    return $stmt->execute();
 }
 
 /**
@@ -94,34 +173,37 @@ function createUser($platform, $data) {
  */
 function authenticateUser($email, $password, $platform) {
     $conn = getDbConnection();
-    $platform = $conn->real_escape_string($platform);
 
     // Normalize the input - if it's a phone number, normalize it
     $input = trim($email);
     if (isPhoneNumber($input)) {
         $input = normalizePhone($input);
     }
-    $input = $conn->real_escape_string($input);
 
-    // Try exact match first
-    $sql = "SELECT id, password_hash, email FROM users WHERE email = '$input' AND platform = '$platform'";
-    $result = $conn->query($sql);
+    // Try exact match first using prepared statement
+    $stmt = $conn->prepare("SELECT id, password_hash, email FROM users WHERE email = ? AND platform = ?");
+    $stmt->bind_param("ss", $input, $platform);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
         if (password_verify($password, $user['password_hash'])) {
-            // Update last login
+            // Update last login using prepared statement
             $user_id = $user['id'];
-            $conn->query("UPDATE users SET last_login = NOW() WHERE id = $user_id");
+            $update_stmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+            $update_stmt->bind_param("i", $user_id);
+            $update_stmt->execute();
             return $user['id'];
         }
     }
 
     // If exact match failed and input looks like a phone, try normalized match
     if (isPhoneNumber($input)) {
-        // Get all users for this platform and check normalized phone numbers
-        $sql = "SELECT id, password_hash, email FROM users WHERE platform = '$platform'";
-        $all_users = $conn->query($sql);
+        $stmt = $conn->prepare("SELECT id, password_hash, email FROM users WHERE platform = ?");
+        $stmt->bind_param("s", $platform);
+        $stmt->execute();
+        $all_users = $stmt->get_result();
 
         while ($user = $all_users->fetch_assoc()) {
             $stored_email = $user['email'];
@@ -130,7 +212,9 @@ function authenticateUser($email, $password, $platform) {
                 if ($normalized_stored === $input) {
                     if (password_verify($password, $user['password_hash'])) {
                         $user_id = $user['id'];
-                        $conn->query("UPDATE users SET last_login = NOW() WHERE id = $user_id");
+                        $update_stmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+                        $update_stmt->bind_param("i", $user_id);
+                        $update_stmt->execute();
                         return $user['id'];
                     }
                 }
@@ -148,8 +232,9 @@ function deleteUser($user_id) {
     $conn = getDbConnection();
     $user_id = intval($user_id);
 
-    $sql = "DELETE FROM users WHERE id = $user_id";
-    return $conn->query($sql);
+    $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    return $stmt->execute();
 }
 
 /**
@@ -159,8 +244,10 @@ function getUserById($user_id) {
     $conn = getDbConnection();
     $user_id = intval($user_id);
 
-    $sql = "SELECT * FROM users WHERE id = $user_id";
-    $result = $conn->query($sql);
+    $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     return $result->num_rows === 1 ? $result->fetch_assoc() : null;
 }

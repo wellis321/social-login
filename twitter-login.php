@@ -4,36 +4,46 @@
  * Authenticate existing users
  */
 
-session_start();
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/security.php';
 
 $errors = [];
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = sanitizeInput($_POST['email']);
-    $password = $_POST['password'];
-
-    if (empty($email) || empty($password)) {
-        $errors[] = "Please enter both email/phone and password";
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $errors[] = "Invalid security token. Please refresh the page and try again.";
     } else {
-        $user_id = authenticateUser($email, $password, 'twitter');
+        $email = sanitizeInput($_POST['email']);
+        $password = $_POST['password'];
 
-        if ($user_id) {
-            logActivity($user_id, 'twitter', 'login', 'User logged in successfully');
-
-            $_SESSION['user_id'] = $user_id;
-            $_SESSION['platform'] = 'twitter';
-
-            header('Location: twitter-dashboard.php');
-            exit;
+        if (empty($email) || empty($password)) {
+            $errors[] = "Please enter both email/phone and password";
         } else {
-            $errors[] = "Incorrect email/phone or password. Please try again.";
-            logActivity(null, 'twitter', 'login_failed', 'Failed login attempt: ' . $email);
+            // Check rate limit (5 attempts per 15 minutes)
+            if (!checkRateLimit('login', $email, 5, 900)) {
+                $errors[] = "Too many login attempts. Please wait 15 minutes before trying again.";
+            } else {
+                $user_id = authenticateUser($email, $password, 'twitter');
+
+                if ($user_id) {
+                    logActivity($user_id, 'twitter', 'login', 'User logged in successfully');
+
+                    $_SESSION['user_id'] = $user_id;
+                    $_SESSION['platform'] = 'twitter';
+
+                    header('Location: twitter-dashboard.php');
+                    exit;
+                } else {
+                    $errors[] = "Incorrect email/phone or password. Please try again.";
+                    logActivity(null, 'twitter', 'login_failed', 'Failed login attempt');
+                }
+            }
         }
     }
 }
+
+$csrf_token = generateCSRFToken();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -83,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                 <div class="form-group">
                     <label for="email">Email address or phone number</label>
                     <input type="text" id="email" name="email"
