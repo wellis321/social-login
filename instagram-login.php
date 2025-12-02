@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="text" name="email"
                                value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
                                placeholder="Phone number, username, or email" required autofocus>
-                        <small>Enter the email you used when signing up</small>
+                        <small>Enter the email, phone number, or username you used when signing up</small>
                     </div>
 
                     <div class="form-group">

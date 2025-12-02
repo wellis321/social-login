@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'];
 
     if (empty($email) || empty($password)) {
-        $errors[] = "Please enter both email and password";
+        $errors[] = "Please enter both email/phone and password";
     } else {
         $user_id = authenticateUser($email, $password, 'twitter');
 
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: twitter-dashboard.php');
             exit;
         } else {
-            $errors[] = "Incorrect email or password. Please try again.";
+            $errors[] = "Incorrect email/phone or password. Please try again.";
             logActivity(null, 'twitter', 'login_failed', 'Failed login attempt: ' . $email);
         }
     }
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h3>🔐 Logging In Safely</h3>
                 <p><strong>What you need:</strong></p>
                 <ul>
-                    <li>The email address you used to sign up</li>
+                    <li>The email address or phone number you used to sign up</li>
                     <li>Your password</li>
                 </ul>
                 <p><strong>Security tips:</strong></p>
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <p><strong>Common issues:</strong></p>
                         <ul>
                             <li>Check that Caps Lock is off</li>
-                            <li>Make sure you're using the correct email</li>
+                            <li>Make sure you're using the correct email or phone number</li>
                             <li>Try typing your password carefully</li>
                         </ul>
                     </div>
@@ -84,11 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form method="POST">
                 <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input type="email" id="email" name="email"
+                    <label for="email">Email address or phone number</label>
+                    <input type="text" id="email" name="email"
                            value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                           placeholder="Enter your email" required autofocus>
-                    <small>This is the email you used when signing up</small>
+                           placeholder="Email or phone number" required autofocus>
+                    <small>Enter the email address or phone number you used when signing up</small>
                 </div>
 
                 <div class="form-group">

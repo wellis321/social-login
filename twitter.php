@@ -55,6 +55,17 @@ session_start();
                 </div>
             </div>
 
+            <div class="security-info-bar">
+                <div class="security-info-content">
+                    <div class="security-icon">🔒</div>
+                    <div class="security-text">
+                        <h3>Check if Your Email is Secure</h3>
+                        <p>Visit <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer">Have I Been Pwned</a> to check if your email address has been involved in any data breaches. If your email has been compromised, you should change your password and review your account security settings.</p>
+                    </div>
+                    <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" class="security-link-btn">Check Your Email →</a>
+                </div>
+            </div>
+
             <footer class="twitter-footer">
                 <a href="index.php">← Back to Platform Selection</a>
                 <span>This is a training simulator - not the real X/Twitter</span>

@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'];
 
     if (empty($email) || empty($password)) {
-        $errors[] = "Please enter both email and password";
+        $errors[] = "Please enter both email/phone and password";
     } else {
         $user_id = authenticateUser($email, $password, 'facebook');
 
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: facebook-dashboard.php');
             exit;
         } else {
-            $errors[] = "The email address or password you entered isn't connected to an account.";
+            $errors[] = "The email/phone or password you entered isn't connected to an account.";
             logActivity(null, 'facebook', 'login_failed', 'Failed login attempt: ' . $email);
         }
     }
@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <h3>🔐 Logging In to Facebook</h3>
                     <p><strong>What you need:</strong></p>
                     <ul>
-                        <li>The email address you used to sign up</li>
+                        <li>The email address or phone number you used to sign up</li>
                         <li>Your Facebook password</li>
                     </ul>
                     <p><strong>Security tips:</strong></p>
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <p><strong>Trouble logging in?</strong></p>
                             <ul>
                                 <li>Make sure Caps Lock is off</li>
-                                <li>Check you're using the correct email</li>
+                                <li>Check you're using the correct email or phone number</li>
                                 <li>Passwords are case-sensitive</li>
                             </ul>
                         </div>
@@ -87,10 +87,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <form method="POST">
                     <div class="form-group">
-                        <input type="email" id="email" name="email"
+                        <input type="text" id="email" name="email"
                                value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                               placeholder="Email address" required autofocus>
-                        <small>This is the email you used when you created your account</small>
+                               placeholder="Email address or phone number" required autofocus>
+                        <small>Enter the email address or phone number you used when you created your account</small>
                     </div>
 
                     <div class="form-group">
