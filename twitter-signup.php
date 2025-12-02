@@ -151,7 +151,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
             <?php if (!empty($errors)): ?>
                 <div class="error-box">
                     <?php foreach ($errors as $error): ?>
-                        <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                        <p>⚠ <?= htmlspecialchars($error) ?></p>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
@@ -159,14 +159,14 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
             <?php if ($step === 1): ?>
                 <!-- Step 1: Email or Phone -->
                 <div class="help-box">
-                    <h3>📧📱 How Do You Want to Sign Up?</h3>
+                    <h3>✉ 📱 How Do You Want to Sign Up?</h3>
                     <p>X (Twitter) lets you sign up using either:</p>
                     <ul>
                         <li><strong>Email:</strong> Use your email address</li>
                         <li><strong>Phone:</strong> Use your mobile phone number</li>
                     </ul>
                     <p><strong>Why?</strong> X will send you a verification code to confirm it's really you. This helps prevent fake accounts and keeps X secure.</p>
-                    <p class="warning-text">⚠️ <strong>Training Mode:</strong> We'll simulate the verification process since we can't send real SMS/emails.</p>
+                    <p class="warning-text">⚠ <strong>Training Mode:</strong> We'll simulate the verification process since we can't send real SMS/emails.</p>
                 </div>
 
                 <form method="POST">
@@ -212,7 +212,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
             <?php elseif ($step === 2): ?>
                 <!-- Step 2: Verification Code -->
                 <div class="help-box">
-                    <h3>🔐 Enter Your Verification Code</h3>
+                    <h3>🔒 Enter Your Verification Code</h3>
                     <p>We've sent a 6-digit code to:</p>
                     <p style="font-weight: 700; font-size: 16px; color: #1d9bf0;"><?= htmlspecialchars($email) ?></p>
                     <p><strong>What is a verification code?</strong></p>
@@ -292,7 +292,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
                     <p><strong>Username:</strong> This is how people will find you on X. It appears as @username</p>
                     <p><strong>Name:</strong> Your full name or the name you want to display</p>
                     <p><strong>Date of birth:</strong> You must be 13 years or older to use X</p>
-                    <p class="warning-text">⚠️ <strong>IMPORTANT:</strong> Your username must be unique - no one else can have the same username!</p>
+                    <p class="warning-text">⚠ <strong>IMPORTANT:</strong> Your username must be unique - no one else can have the same username!</p>
                     <p><strong>Privacy tip:</strong> You can change your display name later, but your username is permanent!</p>
                 </div>
 

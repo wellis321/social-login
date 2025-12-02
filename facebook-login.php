@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h2>Log in to Facebook</h2>
 
                 <div class="help-box">
-                    <h3>🔐 Logging In to Facebook</h3>
+                    <h3>🔒 Logging In to Facebook</h3>
                     <p><strong>What you need:</strong></p>
                     <ul>
                         <li>The email address or phone number you used to sign up</li>
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if (!empty($errors)): ?>
                     <div class="error-box">
                         <?php foreach ($errors as $error): ?>
-                            <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                            <p>⚠ <?= htmlspecialchars($error) ?></p>
                         <?php endforeach; ?>
                         <div class="error-help">
                             <p><strong>Trouble logging in?</strong></p>
@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="facebook-signup.php" class="btn btn-create-new">Create new account</a>
 
                 <div class="info-box">
-                    <p>💡 <strong>Practice Tip:</strong> This is a safe training environment. If you forget your test account details, you can create a new one or ask an admin for help.</p>
+                    <p>ℹ <strong>Practice Tip:</strong> This is a safe training environment. If you forget your test account details, you can create a new one or ask an admin for help.</p>
                 </div>
 
                 <div class="footer-links">

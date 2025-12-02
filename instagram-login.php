@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h1 class="instagram-logo">Instagram</h1>
 
                 <div class="help-box">
-                    <h3>🔐 Logging In to Instagram</h3>
+                    <h3>🔒 Logging In to Instagram</h3>
                     <p><strong>What you need:</strong></p>
                     <ul>
                         <li>Your email address, phone number, or username</li>
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if (!empty($errors)): ?>
                     <div class="error-box">
                         <?php foreach ($errors as $error): ?>
-                            <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                            <p>⚠ <?= htmlspecialchars($error) ?></p>
                         <?php endforeach; ?>
                         <div class="error-help">
                             <p><strong>Trouble logging in?</strong></p>
@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="info-box">
-                    <p>💡 <strong>Practice Tip:</strong> This is a safe training environment. If you can't remember your test account details, you can create a new one or ask an admin for help.</p>
+                    <p>ℹ <strong>Practice Tip:</strong> This is a safe training environment. If you can't remember your test account details, you can create a new one or ask an admin for help.</p>
                 </div>
             </div>
 

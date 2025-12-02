@@ -15,9 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirm_password = $_POST['confirm_password'] ?? '';
 
     if (empty($new_password)) {
-        echo "<p style='color: red;'>❌ Password cannot be empty</p>";
+        echo "<p style='color: red;'>✗ Password cannot be empty</p>";
     } elseif ($new_password !== $confirm_password) {
-        echo "<p style='color: red;'>❌ Passwords do not match</p>";
+        echo "<p style='color: red;'>✗ Passwords do not match</p>";
     } else {
         try {
             require_once __DIR__ . '/config/database.php';
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($stmt->execute()) {
                 echo "<div style='background: #d4edda; border: 1px solid #28a745; padding: 20px; border-radius: 8px; margin: 20px 0;'>";
-                echo "<h3 style='color: #155724; margin: 0 0 10px 0;'>✅ Password Reset Successful!</h3>";
+                echo "<h3 style='color: #155724; margin: 0 0 10px 0;'>✓ Password Reset Successful!</h3>";
                 echo "<p style='margin: 0;'>You can now log in with:</p>";
                 echo "<ul style='margin: 10px 0;'>";
                 echo "<li><strong>Username:</strong> admin</li>";
@@ -43,14 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 echo "<hr>";
                 echo "<p style='color: #856404; background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px;'>";
-                echo "⚠️ <strong>Security:</strong> Delete this file (reset-admin-password.php) after resetting your password!";
+                echo "⚠ <strong>Security:</strong> Delete this file (reset-admin-password.php) after resetting your password!";
                 echo "</p>";
                 exit;
             } else {
-                echo "<p style='color: red;'>❌ Failed to update password: " . $conn->error . "</p>";
+                echo "<p style='color: red;'>✗ Failed to update password: " . $conn->error . "</p>";
             }
         } catch (Exception $e) {
-            echo "<p style='color: red;'>❌ Error: " . $e->getMessage() . "</p>";
+            echo "<p style='color: red;'>✗ Error: " . $e->getMessage() . "</p>";
         }
     }
 }
@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="info">
-        <p><strong>ℹ️ Use this tool to reset the admin password if you're locked out.</strong></p>
+        <p><strong>ℹ Use this tool to reset the admin password if you're locked out.</strong></p>
         <p style="margin-bottom: 0;">Current admin username: <code>admin</code></p>
     </div>
 

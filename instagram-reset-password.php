@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $valid_token) {
 
             <?php if ($error): ?>
                 <div class="error-box">
-                    <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                    <p>⚠ <?= htmlspecialchars($error) ?></p>
                 </div>
                 <div class="footer-links">
                     <a href="instagram-forgot-password.php">Request New Reset Link</a> •

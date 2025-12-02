@@ -50,15 +50,15 @@ if (isset($_POST['delete_account'])) {
 
         <div class="dashboard-content">
             <div class="success-message">
-                <h1>✅ Welcome to Instagram!</h1>
+                <h1>✓ Welcome to Instagram!</h1>
                 <p class="welcome-text">You're all set, @<?= htmlspecialchars($user['username']) ?>!</p>
             </div>
 
             <div class="learning-box">
-                <h2>🎓 What You've Just Learned</h2>
+                <h2>What You've Just Learned</h2>
 
                 <div class="learning-section">
-                    <h3>✅ Creating an Instagram Account</h3>
+                    <h3>✓ Creating an Instagram Account</h3>
                     <p>You successfully completed Instagram registration:</p>
                     <ul>
                         <li><strong>Email verification</strong> - Providing a valid email address</li>
@@ -69,7 +69,7 @@ if (isset($_POST['delete_account'])) {
                 </div>
 
                 <div class="learning-section">
-                    <h3>🔐 Logging In to Instagram</h3>
+                    <h3>🔒 Logging In to Instagram</h3>
                     <p>You know how to access your account using:</p>
                     <ul>
                         <li>Your email address or username</li>
@@ -92,7 +92,7 @@ if (isset($_POST['delete_account'])) {
                 </div>
 
                 <div class="learning-section warning">
-                    <h3>⚠️ Instagram Safety & Privacy Tips</h3>
+                    <h3>⚠ Instagram Safety & Privacy Tips</h3>
                     <ul>
                         <li>Set your account to private if you only want approved followers</li>
                         <li>Be careful about what personal information you share</li>
@@ -107,7 +107,7 @@ if (isset($_POST['delete_account'])) {
                 </div>
 
                 <div class="learning-section">
-                    <h3>🎯 Getting Started on Real Instagram</h3>
+                    <h3>Getting Started on Real Instagram</h3>
                     <p>Once you create a real Instagram account, you should:</p>
                     <ul>
                         <li>Add a profile picture and write a bio</li>
@@ -122,7 +122,7 @@ if (isset($_POST['delete_account'])) {
                 </div>
 
                 <div class="learning-section">
-                    <h3>💬 Instagram Etiquette</h3>
+                    <h3>Instagram Etiquette</h3>
                     <ul>
                         <li>Like and comment on posts you genuinely enjoy</li>
                         <li>Give credit when reposting others' content</li>
@@ -167,7 +167,7 @@ if (isset($_POST['delete_account'])) {
             </div>
 
             <div class="danger-zone">
-                <h3>⚠️ Practice Account Management</h3>
+                <h3>⚠ Practice Account Management</h3>
                 <p>Since this is a training environment, you can delete this practice account:</p>
                 <form method="POST" onsubmit="return confirm('Are you sure you want to delete this practice account? This cannot be undone.');">
                     <button type="submit" name="delete_account" class="btn btn-danger">Delete Practice Account</button>

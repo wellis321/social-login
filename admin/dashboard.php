@@ -77,7 +77,7 @@ $users = $conn->query($sql);
     <div class="admin-dashboard">
         <nav class="admin-nav">
             <div class="nav-left">
-                <h1>🔐 Admin Panel</h1>
+                <h1>🔒 Admin Panel</h1>
                 <span class="nav-subtitle">Social Login Training</span>
             </div>
             <div class="nav-right">
@@ -93,7 +93,7 @@ $users = $conn->query($sql);
             <?php endif; ?>
 
             <?php if ($error): ?>
-                <div class="error-box">⚠️ <?= htmlspecialchars($error) ?></div>
+                <div class="error-box">⚠ <?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
 
             <!-- Statistics -->
@@ -114,7 +114,7 @@ $users = $conn->query($sql);
                     <div class="stat-label">Facebook</div>
                 </div>
                 <div class="stat-card instagram">
-                    <div class="stat-icon">📷</div>
+                    <div class="stat-icon">📸</div>
                     <div class="stat-value"><?= $stats['instagram'] ?></div>
                     <div class="stat-label">Instagram</div>
                 </div>
@@ -188,7 +188,7 @@ $users = $conn->query($sql);
                                         if (isPhoneNumber($contact)) {
                                             echo '<span title="Phone number">📱 ' . htmlspecialchars($contact) . '</span>';
                                         } else {
-                                            echo '<span title="Email address">📧 ' . htmlspecialchars($contact) . '</span>';
+                                            echo '<span title="Email address">✉ ' . htmlspecialchars($contact) . '</span>';
                                         }
                                         ?>
                                     </td>

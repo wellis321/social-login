@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php if ($error): ?>
                 <div class="error-box">
-                    <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                    <p>⚠ <?= htmlspecialchars($error) ?></p>
                 </div>
             <?php endif; ?>
 

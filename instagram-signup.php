@@ -159,7 +159,7 @@ $verification_code = $_SESSION['signup_data']['verification_code'] ?? '';
                 <?php if (!empty($errors)): ?>
                     <div class="error-box">
                         <?php foreach ($errors as $error): ?>
-                            <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                            <p>⚠ <?= htmlspecialchars($error) ?></p>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>

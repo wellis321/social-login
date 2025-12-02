@@ -54,15 +54,15 @@ if (isset($_POST['delete_account'])) {
 
         <div class="dashboard-content">
             <div class="success-message">
-                <h1>✅ Welcome to Facebook!</h1>
+                <h1>✓ Welcome to Facebook!</h1>
                 <p class="welcome-text">You've successfully logged in, <?= htmlspecialchars($user['full_name']) ?>!</p>
             </div>
 
             <div class="learning-box">
-                <h2>🎓 What You've Just Learned</h2>
+                <h2>What You've Just Learned</h2>
 
                 <div class="learning-section">
-                    <h3>✅ Creating a Facebook Account</h3>
+                    <h3>✓ Creating a Facebook Account</h3>
                     <p>You successfully completed the registration process:</p>
                     <ul>
                         <li><strong>Personal information</strong> - Providing your name and email</li>
@@ -73,7 +73,7 @@ if (isset($_POST['delete_account'])) {
                 </div>
 
                 <div class="learning-section">
-                    <h3>🔐 Logging In to Facebook</h3>
+                    <h3>🔒 Logging In to Facebook</h3>
                     <p>You know how to access your Facebook account using:</p>
                     <ul>
                         <li>Your registered email address</li>
@@ -82,7 +82,7 @@ if (isset($_POST['delete_account'])) {
                 </div>
 
                 <div class="learning-section">
-                    <h3>💡 Important Facebook Concepts</h3>
+                    <h3>ℹ Important Facebook Concepts</h3>
                     <ul>
                         <li><strong>Profile:</strong> Your Facebook page that shows your information and posts</li>
                         <li><strong>News Feed:</strong> Where you see updates from friends and pages you follow</li>
@@ -93,7 +93,7 @@ if (isset($_POST['delete_account'])) {
                 </div>
 
                 <div class="learning-section warning">
-                    <h3>⚠️ Facebook Safety Tips</h3>
+                    <h3>⚠ Facebook Safety Tips</h3>
                     <ul>
                         <li>Never share your password with anyone</li>
                         <li>Be careful about what personal information you post publicly</li>
@@ -106,7 +106,7 @@ if (isset($_POST['delete_account'])) {
                 </div>
 
                 <div class="learning-section">
-                    <h3>🎯 Next Steps on Real Facebook</h3>
+                    <h3>Next Steps on Real Facebook</h3>
                     <p>Once you create a real Facebook account, you can:</p>
                     <ul>
                         <li>Add a profile picture and cover photo</li>
@@ -148,7 +148,7 @@ if (isset($_POST['delete_account'])) {
             </div>
 
             <div class="danger-zone">
-                <h3>⚠️ Practice Account Management</h3>
+                <h3>⚠ Practice Account Management</h3>
                 <p>Since this is a training environment, you can delete this practice account:</p>
                 <form method="POST" onsubmit="return confirm('Are you sure you want to delete this practice account? This cannot be undone.');">
                     <button type="submit" name="delete_account" class="btn btn-danger">Delete Practice Account</button>

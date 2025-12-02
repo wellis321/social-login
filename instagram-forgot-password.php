@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php if ($error): ?>
                 <div class="error-box">
-                    <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                    <p>⚠ <?= htmlspecialchars($error) ?></p>
                 </div>
             <?php endif; ?>
 
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p>✓ <?= htmlspecialchars($success) ?></p>
                     <?php if (isset($_SESSION['reset_link'])): ?>
                         <div class="info-box" style="margin-top: 16px;">
-                            <h3>📧 Training Mode - Password Reset Link</h3>
+                            <h3>✉ Training Mode - Password Reset Link</h3>
                             <p>In a real application, this link would be emailed to you. Click below to reset your password:</p>
                             <a href="<?= htmlspecialchars($_SESSION['reset_link']) ?>" class="btn btn-primary btn-block" style="margin-top: 12px;">Reset My Password</a>
                             <p style="margin-top: 12px; font-size: 12px; color: #737373;">This link expires in 1 hour.</p>

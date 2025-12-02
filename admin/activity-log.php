@@ -54,7 +54,7 @@ $actions = $conn->query("SELECT DISTINCT action FROM activity_log ORDER BY actio
     <div class="admin-dashboard">
         <nav class="admin-nav">
             <div class="nav-left">
-                <h1>📊 Activity Log</h1>
+                <h1>📈 Activity Log</h1>
                 <span class="nav-subtitle">User Activity Tracking</span>
             </div>
             <div class="nav-right">
@@ -141,7 +141,7 @@ $actions = $conn->query("SELECT DISTINCT action FROM activity_log ORDER BY actio
                                         if ($contact !== '-' && isPhoneNumber($contact)) {
                                             echo '<span title="Phone number">📱 ' . htmlspecialchars($contact) . '</span>';
                                         } elseif ($contact !== '-') {
-                                            echo '<span title="Email address">📧 ' . htmlspecialchars($contact) . '</span>';
+                                            echo '<span title="Email address">✉ ' . htmlspecialchars($contact) . '</span>';
                                         } else {
                                             echo '-';
                                         }

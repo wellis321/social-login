@@ -52,15 +52,15 @@ if (isset($_POST['delete_account'])) {
 
         <div class="dashboard-content">
             <div class="success-message">
-                <h1>✅ Success! You're logged in!</h1>
+                <h1>✓ Success! You're logged in!</h1>
                 <p class="welcome-text">Welcome back, <?= htmlspecialchars($user['full_name']) ?>!</p>
             </div>
 
             <div class="learning-box">
-                <h2>🎓 What You've Just Learned</h2>
+                <h2>What You've Just Learned</h2>
 
                 <div class="learning-section">
-                    <h3>✅ Registration Process</h3>
+                    <h3>✓ Registration Process</h3>
                     <p>You successfully completed all the steps to create an X/Twitter account:</p>
                     <ul>
                         <li><strong>Email verification</strong> - Providing a valid email address</li>
@@ -70,7 +70,7 @@ if (isset($_POST['delete_account'])) {
                 </div>
 
                 <div class="learning-section">
-                    <h3>🔐 Login Process</h3>
+                    <h3>🔒 Login Process</h3>
                     <p>You know how to log in to X using:</p>
                     <ul>
                         <li>Your registered email address</li>
@@ -79,7 +79,7 @@ if (isset($_POST['delete_account'])) {
                 </div>
 
                 <div class="learning-section">
-                    <h3>💡 Important Things to Remember</h3>
+                    <h3>ℹ Important Things to Remember</h3>
                     <ul>
                         <li><strong>Keep your password safe</strong> - Never share it with anyone</li>
                         <li><strong>Log out when done</strong> - Especially on shared computers</li>
@@ -90,7 +90,7 @@ if (isset($_POST['delete_account'])) {
                 </div>
 
                 <div class="learning-section warning">
-                    <h3>⚠️ Common Mistakes to Avoid</h3>
+                    <h3>⚠ Common Mistakes to Avoid</h3>
                     <ul>
                         <li>Using the same password for multiple sites</li>
                         <li>Clicking on suspicious links in emails</li>
@@ -134,7 +134,7 @@ if (isset($_POST['delete_account'])) {
             </div>
 
             <div class="danger-zone">
-                <h3>⚠️ Practice Account Management</h3>
+                <h3>⚠ Practice Account Management</h3>
                 <p>Since this is a training environment, you can delete this practice account:</p>
                 <form method="POST" onsubmit="return confirm('Are you sure you want to delete this practice account? This cannot be undone.');">
                     <button type="submit" name="delete_account" class="btn btn-danger">Delete Practice Account</button>

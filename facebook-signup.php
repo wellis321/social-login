@@ -192,7 +192,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                     <?php if (!empty($errors)): ?>
                         <div class="error-box">
                             <?php foreach ($errors as $error): ?>
-                                <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                                <p>⚠ <?= htmlspecialchars($error) ?></p>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
@@ -330,7 +330,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                     <?php if (!empty($errors)): ?>
                         <div class="error-box">
                             <?php foreach ($errors as $error): ?>
-                                <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                                <p>⚠ <?= htmlspecialchars($error) ?></p>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
@@ -353,7 +353,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                     </form>
 
                     <div style="background: #e7f3ff; border: 1px solid #1877f2; padding: 16px; border-radius: 8px; margin-top: 20px;">
-                        <p style="color: #1877f2; margin: 0; font-size: 12px;"><strong>📧 Training Mode - Your Code:</strong></p>
+                        <p style="color: #1877f2; margin: 0; font-size: 12px;"><strong>✉ Training Mode - Your Code:</strong></p>
                         <p style="color: #1877f2; font-size: 24px; font-weight: 700; margin: 8px 0; letter-spacing: 4px; font-family: monospace; text-align: center;"><?= $verification_code ?></p>
                         <p style="color: #1877f2; font-size: 12px; margin: 0; text-align: center;">In real life, you'd receive this via email. Copy and paste it above!</p>
                     </div>
@@ -419,7 +419,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                 <?php elseif ($step === 4): ?>
                     <!-- Step 4: Human Verification Prompt (auto-redirects) -->
                     <div style="text-align: center; padding: 40px 20px;">
-                        <div style="font-size: 64px; margin-bottom: 20px;">🛡️</div>
+                        <div style="font-size: 64px; margin-bottom: 20px;">🛡</div>
                         <h2><?= htmlspecialchars($first_name . ' ' . $last_name) ?>, confirm that you're human to use your account</h2>
                         <form method="POST" style="margin-top: 30px;">
                             <button type="submit" class="btn btn-signup btn-block">Continue</button>
@@ -434,7 +434,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                     <?php if (!empty($errors)): ?>
                         <div class="error-box">
                             <?php foreach ($errors as $error): ?>
-                                <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                                <p>⚠ <?= htmlspecialchars($error) ?></p>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
@@ -457,7 +457,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                         </div>
 
                         <div style="background: #e0f2fe; border: 1px solid #1877f2; padding: 16px; border-radius: 8px; margin-top: 20px;">
-                            <p style="color: #1877f2; margin: 0; font-size: 12px;"><strong>🔐 Training Mode - CAPTCHA Code:</strong></p>
+                            <p style="color: #1877f2; margin: 0; font-size: 12px;"><strong>🔒 Training Mode - CAPTCHA Code:</strong></p>
                             <p style="color: #1877f2; font-size: 24px; font-weight: 700; margin: 8px 0; letter-spacing: 8px; font-family: monospace; text-align: center;"><?= $captcha_code ?></p>
                             <p style="color: #1877f2; font-size: 12px; margin: 0; text-align: center;">Enter this code above!</p>
                         </div>

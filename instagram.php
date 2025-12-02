@@ -21,7 +21,7 @@ session_start();
                 <div class="phone-content">
                     <p>📸 Share photos and videos</p>
                     <p>💬 Connect with friends</p>
-                    <p>🌟 Discover new content</p>
+                    <p>⭐ Discover new content</p>
                 </div>
             </div>
         </div>
@@ -41,7 +41,7 @@ session_start();
                 <a href="instagram-login.php" class="link-login">Log in</a>
 
                 <div class="help-section">
-                    <h3>🎓 Learning About Instagram</h3>
+                    <h3>Learning About Instagram</h3>
                     <ul>
                         <li><strong>What is Instagram?</strong> A photo and video sharing social networking service</li>
                         <li><strong>Creating an account:</strong> You'll need an email or phone number, full name, username, and password</li>
@@ -59,7 +59,7 @@ session_start();
 
             <div class="security-info-bar">
                 <div class="security-info-content">
-                    <div class="security-icon">🔒</div>
+                    <div class="security-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
                     <div class="security-text">
                         <h3>Check if Your Email is Secure</h3>
                         <p>Visit <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer">Have I Been Pwned</a> to check if your email address has been involved in any data breaches. If your email has been compromised, you should change your password and review your account security settings.</p>

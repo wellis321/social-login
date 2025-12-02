@@ -61,13 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="login-container">
             <div class="login-card">
                 <div class="admin-header">
-                    <h1>🔐 Admin Panel</h1>
+                    <h1>🔒 Admin Panel</h1>
                     <p>Social Login Training Simulator</p>
                 </div>
 
                 <?php if ($error): ?>
                     <div class="error-box">
-                        <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                        <p>⚠ <?= htmlspecialchars($error) ?></p>
                     </div>
                 <?php endif; ?>
 
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p><strong>Default Credentials:</strong></p>
                     <p>Username: <code>admin</code></p>
                     <p>Password: <code>admin123</code></p>
-                    <p class="warning">⚠️ Change these credentials in production!</p>
+                    <p class="warning">⚠ Change these credentials in production!</p>
                 </div>
 
                 <div class="back-link">

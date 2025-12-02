@@ -159,23 +159,43 @@ main {
 .security-info-bar {
     background: linear-gradient(135deg, #1877f2 0%, #0a58ca 100%);
     color: white;
-    padding: 24px;
-    border-radius: 10px;
+    padding: 32px;
+    border-radius: 12px;
     margin: 30px 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 20px rgba(24, 119, 242, 0.3);
+    border-left: 5px solid #ffd700;
 }
 
 .security-info-content {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
     max-width: 1200px;
     margin: 0 auto;
 }
 
 .security-icon {
-    font-size: 3em;
     flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.2);
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.security-icon svg {
+    width: 40px;
+    height: 40px;
+    color: currentColor;
+}
+
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .security-text {
@@ -184,14 +204,27 @@ main {
 
 .security-text h3 {
     color: white;
-    margin-bottom: 8px;
-    font-size: 1.3em;
+    margin-bottom: 12px;
+    font-size: 1.5em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.security-text h3::before {
+    content: 'ℹ';
+    font-size: 1.2em;
+    background: rgba(255, 255, 255, 0.25);
+    padding: 6px 10px;
+    border-radius: 6px;
 }
 
 .security-text p {
     color: rgba(255, 255, 255, 0.95);
     margin: 0;
-    line-height: 1.6;
+    line-height: 1.7;
+    font-size: 1.05em;
 }
 
 .security-text a {
@@ -257,7 +290,14 @@ footer a:hover {
     }
 
     .security-icon {
-        font-size: 2.5em;
+        font-size: 3em;
+        width: 70px;
+        height: 70px;
+    }
+
+    .security-text h3 {
+        flex-direction: column;
+        gap: 8px;
     }
 
     .security-link-btn {

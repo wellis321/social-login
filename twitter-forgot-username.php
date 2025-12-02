@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php if ($error): ?>
                 <div class="error-box">
-                    <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                    <p>⚠ <?= htmlspecialchars($error) ?></p>
                 </div>
             <?php endif; ?>
 
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="success-box">
                     <p>✓ <?= htmlspecialchars($success) ?></p>
                     <div class="info-box" style="margin-top: 16px;">
-                        <h3>📧 Your Username</h3>
+                        <h3>✉ Your Username</h3>
                         <p style="font-size: 24px; font-weight: 700; color: #1d9bf0; margin: 16px 0;">@<?= htmlspecialchars($username) ?></p>
                         <p style="margin-top: 12px;">You can now use this username to log in!</p>
                     </div>

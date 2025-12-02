@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h1>Sign in to X</h1>
 
             <div class="help-box">
-                <h3>🔐 Logging In Safely</h3>
+                <h3>🔒 Logging In Safely</h3>
                 <p><strong>What you need:</strong></p>
                 <ul>
                     <li>The email address or phone number you used to sign up</li>
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php if (!empty($errors)): ?>
                 <div class="error-box">
                     <?php foreach ($errors as $error): ?>
-                        <p>⚠️ <?= htmlspecialchars($error) ?></p>
+                        <p>⚠ <?= htmlspecialchars($error) ?></p>
                     <?php endforeach; ?>
                     <div class="error-help">
                         <p><strong>Common issues:</strong></p>
@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="info-box">
-                <p>💡 <strong>Practice Tip:</strong> In this training environment, if you can't remember your test account details, you can always create a new one or ask an admin to help you.</p>
+                <p>ℹ <strong>Practice Tip:</strong> In this training environment, if you can't remember your test account details, you can always create a new one or ask an admin to help you.</p>
             </div>
         </div>
     </div>
