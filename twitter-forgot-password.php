@@ -21,8 +21,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Normalize the input - if it's a phone number, normalize it
         $input = trim($contact_value);
-        if (isPhoneNumber($input)) {
-            $input = normalizePhone($input);
+        $is_phone = false;
+        try {
+            if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
+                if (isPhoneNumber($input)) {
+                    $input = normalizePhone($input);
+                    $is_phone = true;
+                }
+            }
+        } catch (Exception $e) {
+            // If phone functions fail, just use the input as-is
+            error_log("Phone number function error: " . $e->getMessage());
         }
         $input_safe = $conn->real_escape_string($input);
 
@@ -30,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = $conn->query("SELECT id, email FROM users WHERE email = '$input_safe' AND platform = 'twitter'");
 
         // If exact match failed and input looks like a phone, try normalized match
-        if ($result && $result->num_rows === 0 && isPhoneNumber($contact_value)) {
+        if ($result && $result->num_rows === 0 && $is_phone && function_exists('isPhoneNumber')) {
             // Get all users for this platform and check normalized phone numbers
             $all_users = $conn->query("SELECT id, email FROM users WHERE platform = 'twitter'");
             $found_user = null;
@@ -38,12 +47,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($all_users) {
                 while ($user = $all_users->fetch_assoc()) {
                     $stored_email = $user['email'];
-                    if (isPhoneNumber($stored_email)) {
-                        $normalized_stored = normalizePhone($stored_email);
-                        if ($normalized_stored === $input) {
-                            $found_user = $user;
-                            break;
+                    try {
+                        if (function_exists('isPhoneNumber') && function_exists('normalizePhone')) {
+                            if (isPhoneNumber($stored_email)) {
+                                $normalized_stored = normalizePhone($stored_email);
+                                if ($normalized_stored === $input) {
+                                    $found_user = $user;
+                                    break;
+                                }
+                            }
                         }
+                    } catch (Exception $e) {
+                        // Skip this user if phone functions fail
+                        continue;
                     }
                 }
             }

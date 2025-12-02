@@ -23,7 +23,7 @@ if (empty($token)) {
 
     $result = $conn->query("SELECT id, email FROM users WHERE reset_token = '$token_safe' AND reset_token_expires > NOW() AND platform = 'twitter'");
 
-    if ($result->num_rows > 0) {
+    if ($result && $result->num_rows > 0) {
         $valid_token = true;
         $user_data = $result->fetch_assoc();
         $user_email = $user_data['email'];
@@ -48,9 +48,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $valid_token) {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
         // Update password and clear reset token
-        $conn->query("UPDATE users SET password_hash = '$password_hash', reset_token = NULL, reset_token_expires = NULL WHERE reset_token = '$token_safe' AND platform = 'twitter'");
+        $update_result = $conn->query("UPDATE users SET password_hash = '$password_hash', reset_token = NULL, reset_token_expires = NULL WHERE reset_token = '$token_safe' AND platform = 'twitter'");
 
-        logActivity($user_data['id'], 'twitter', 'password_reset', "Password successfully reset for $user_email");
+        if ($update_result) {
+            // Get user ID for logging
+            $token_result = $conn->query("SELECT id FROM users WHERE reset_token = '$token_safe' AND platform = 'twitter'");
+            $user_id = null;
+            if ($token_result && $token_result->num_rows > 0) {
+                $token_user = $token_result->fetch_assoc();
+                $user_id = $token_user['id'];
+            }
+
+            if (function_exists('logActivity') && $user_id) {
+                @logActivity($user_id, 'twitter', 'password_reset', "Password successfully reset for $user_email");
+            }
+        }
 
         $success = "Your password has been reset successfully! You can now log in with your new password.";
     }
