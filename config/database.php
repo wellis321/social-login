@@ -73,12 +73,15 @@ function initializeDatabase() {
         full_name VARCHAR(255) DEFAULT NULL,
         phone VARCHAR(20) DEFAULT NULL,
         date_of_birth DATE DEFAULT NULL,
+        reset_token VARCHAR(64) DEFAULT NULL COMMENT 'Password reset token',
+        reset_token_expires TIMESTAMP NULL DEFAULT NULL COMMENT 'Token expiration time',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_login TIMESTAMP NULL DEFAULT NULL,
         is_active BOOLEAN DEFAULT TRUE COMMENT 'Allows soft deletion',
         UNIQUE KEY unique_email_platform (email, platform),
         INDEX idx_platform (platform),
-        INDEX idx_email (email)
+        INDEX idx_email (email),
+        INDEX idx_reset_token (reset_token)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     if (!$conn->query($sql)) {
