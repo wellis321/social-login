@@ -264,6 +264,7 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                                 Custom
                             </label>
                         </div>
+                        <small style="color: #65676b; margin-top: 8px; display: block;">Your gender won't be visible to others unless you choose to share it.</small>
                     </div>
 
                     <div class="form-group" id="pronoun-group" style="display: <?= $gender === 'Custom' ? 'block' : 'none' ?>;">
@@ -283,8 +284,24 @@ $captcha_code = $_SESSION['signup_data']['captcha_code'] ?? '';
                     </div>
 
                     <div class="form-group">
+                        <label for="password">New password *</label>
                         <input type="password" id="password" name="password"
                                placeholder="New password" required>
+                        <small style="color: #65676b; margin-top: 6px; display: block;">
+                            Use at least 8 characters. Mix uppercase and lowercase letters, numbers, and symbols for better security.
+                        </small>
+                    </div>
+
+                    <div class="help-box" style="margin-bottom: 16px;">
+                        <h4 style="color: #1877f2; margin-bottom: 8px; font-size: 13px;">🔒 Password Tips</h4>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 12px;">
+                            <li>Use at least 8 characters</li>
+                            <li>Mix uppercase and lowercase letters</li>
+                            <li>Include numbers and symbols (!@#$%)</li>
+                            <li>Don't use common words like "password" or "123456"</li>
+                            <li>Don't use your name or birthday</li>
+                            <li><strong>Never share your password with anyone!</strong></li>
+                        </ul>
                     </div>
 
                     <p class="terms">

@@ -27,7 +27,7 @@ header {
     background: white;
     border-radius: 10px;
     margin-bottom: 30px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 header h1 {
@@ -45,7 +45,7 @@ main {
     background: white;
     padding: 40px;
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .platform-selection h2 {
@@ -64,7 +64,7 @@ main {
 .platform-card {
     display: block;
     padding: 30px;
-    text-align: center;
+    text-align: left;
     text-decoration: none;
     border-radius: 10px;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -73,7 +73,7 @@ main {
 
 .platform-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
 }
 
 .platform-card.twitter {
@@ -106,6 +106,7 @@ main {
 .platform-icon {
     font-size: 4em;
     margin-bottom: 15px;
+    text-align: center;
 }
 
 .platform-card.twitter .platform-icon {
@@ -126,6 +127,7 @@ main {
     color: #1a1a1a;
     margin-bottom: 10px;
     font-size: 1.5em;
+    text-align: center;
 }
 
 .platform-card p {

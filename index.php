@@ -31,19 +31,22 @@ require_once __DIR__ . '/includes/functions.php';
                     <a href="twitter.php" class="platform-card twitter">
                         <div class="platform-icon">𝕏</div>
                         <h3>Twitter / X</h3>
-                        <p>Learn how to create an account and log in to X (formerly Twitter)</p>
+                        <p><strong>What is X?</strong> X (formerly Twitter) is a social media platform where you can share short messages (tweets), follow news, connect with friends, and join conversations about topics you care about.</p>
+                        <p style="margin-top: 8px;"><strong>Why use it?</strong> Stay updated with real-time news, follow your interests, share your thoughts, and connect with people worldwide. Great for quick updates and public conversations.</p>
                     </a>
 
                     <a href="facebook.php" class="platform-card facebook">
                         <div class="platform-icon">f</div>
                         <h3>Facebook</h3>
-                        <p>Learn how to create an account and log in to Facebook</p>
+                        <p><strong>What is Facebook?</strong> Facebook is a social networking platform where you can connect with friends and family, share photos and updates, join groups, and stay in touch with people you know.</p>
+                        <p style="margin-top: 8px;"><strong>Why use it?</strong> Connect with friends and family, share life updates, join community groups, discover events, and keep in touch with people from your past and present. Great for personal connections.</p>
                     </a>
 
                     <a href="instagram.php" class="platform-card instagram">
                         <div class="platform-icon">📷</div>
                         <h3>Instagram</h3>
-                        <p>Learn how to create an account and log in to Instagram</p>
+                        <p><strong>What is Instagram?</strong> Instagram is a photo and video sharing platform where you can share visual content, follow friends and interests, and discover creative content through photos, videos, and stories.</p>
+                        <p style="margin-top: 8px;"><strong>Why use it?</strong> Share your life through photos and videos, follow friends and influencers, discover new interests, express your creativity, and stay connected visually. Great for visual storytelling.</p>
                     </a>
                 </div>
             </div>
